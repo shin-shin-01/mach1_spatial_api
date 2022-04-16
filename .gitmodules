@@ -1,0 +1,3 @@
+[submodule "ios/ios/Pod-Mach1SpatialAPI"]
+	path = ios/ios/Pod-Mach1SpatialAPI
+	url = git@github.com:Mach1Studios/Pod-Mach1SpatialAPI.git

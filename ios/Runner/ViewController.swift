@@ -10,6 +10,7 @@ import UIKit
 import CoreMotion
 import AVFoundation
 import Mach1SpatialAPI
+import UIKit
 
 /// As of 11/11/2021 the recommended minimum iOS target is 14.0 to make the examples
 /// compatible with Headphone Motion Manager API from Apple.
@@ -43,7 +44,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     @IBOutlet weak var yaw: UILabel!
     @IBOutlet weak var pitch: UILabel!
     @IBOutlet weak var roll: UILabel!
-    @IBAction func playButton(_ sender: Any) {
+
+    func playButton() {
         if !isPlaying {
             var startDelayTime = 1.0
             var now = players[0].deviceCurrentTime
@@ -57,7 +59,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             isPlaying = true
         }
     }
-    @IBAction func stopButton(_ sender: Any) {
+    
+    func stopButton() {
         for audioPlayer in players {
             audioPlayer.stop()
         }
@@ -70,40 +73,45 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         }
         //stereoPlayer.prepareToPlay()
     }
-    @IBAction func staticStereoActive(_ sender: Any) {
-        stereoActive = !stereoActive
-    }
-    @IBAction func headphoneIMUActive(_ sender: Any) {
-        bUseCoreMotionHeadphones = UseHeadphoneOrientationDataSwitch.isOn
-    }
-    @IBAction func yawActive(_ sender: Any) {
-        isYawActive = !isYawActive
-    }
-    @IBAction func pitchActive(_ sender: Any) {
-        isPitchActive = !isPitchActive
-    }
-    @IBAction func rollActive(_ sender: Any) {
-        isRollActive = !isRollActive
-    }
-    func headphoneMotionManagerDidConnect(_ manager: CMHeadphoneMotionManager) {
-        print("connect")
-        bUseCoreMotionHeadphones = true
-        DispatchQueue.main.async() {
-            self.UseHeadphoneOrientationDataSwitch.setOn(bUseCoreMotionHeadphones, animated: true)
-        }
-    }
-    func headphoneMotionManagerDidDisconnect(_ manager: CMHeadphoneMotionManager) {
-        print("disconnect")
-        bUseCoreMotionHeadphones = false
-        DispatchQueue.main.async() {
-            self.UseHeadphoneOrientationDataSwitch.setOn(bUseCoreMotionHeadphones, animated: true)
-        }
-    }
+
+    // // CommentOut
+    // @IBAction func staticStereoActive(_ sender: Any) {
+    //     stereoActive = !stereoActive
+    // }
+    // @IBAction func headphoneIMUActive(_ sender: Any) {
+    //     bUseCoreMotionHeadphones = UseHeadphoneOrientationDataSwitch.isOn
+    // }
+    // @IBAction func yawActive(_ sender: Any) {
+    //     isYawActive = !isYawActive
+    // }
+    // @IBAction func pitchActive(_ sender: Any) {
+    //     isPitchActive = !isPitchActive
+    // }
+    // @IBAction func rollActive(_ sender: Any) {
+    //     isRollActive = !isRollActive
+    // }
+    // func headphoneMotionManagerDidConnect(_ manager: CMHeadphoneMotionManager) {
+    //     print("connect")
+    //     bUseCoreMotionHeadphones = true
+    //     DispatchQueue.main.async() {
+    //         self.UseHeadphoneOrientationDataSwitch.setOn(bUseCoreMotionHeadphones, animated: true)
+    //     }
+    // }
+    // func headphoneMotionManagerDidDisconnect(_ manager: CMHeadphoneMotionManager) {
+    //     print("disconnect")
+    //     bUseCoreMotionHeadphones = false
+    //     DispatchQueue.main.async() {
+    //         self.UseHeadphoneOrientationDataSwitch.setOn(bUseCoreMotionHeadphones, animated: true)
+    //     }
+    // }
 
 
     // 最初に実行される箇所
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        let appDelegate:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.viewController = self
         
         do {
             for i in 0...7 {
@@ -157,7 +165,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         //Allow audio to play when app closes
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            try audioSession.setCategory(AVAudioSessionCategoryPlayback)
+            try audioSession.setCategory(AVAudioSession.Category.playback)
         } catch {
             print(error)
         }

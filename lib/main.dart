@@ -31,12 +31,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const platform = MethodChannel('test_camera');
+  static const platform = MethodChannel('audio');
 
-  Future<void> _getCamera() async {
-    print("startMethod: _getCamera");
+  Future<void> _startAudio() async {
+    print("startMethod: _startAudio");
     try {
-      await platform.invokeMethod('getCamera');
+      await platform.invokeMethod('playAudio');
     } on PlatformException catch (e) {
       print(e);
     }
@@ -50,11 +50,11 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'Camera List!',
+              'Audio!',
             ),
             ElevatedButton(
-              child: const Text('Get Camera'),
-              onPressed: _getCamera,
+              child: const Text('playAudio'),
+              onPressed: _startAudio,
             ),
           ],
         ),

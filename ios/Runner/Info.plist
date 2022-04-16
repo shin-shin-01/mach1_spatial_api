@@ -43,10 +43,27 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	
 	<!-- 音声の許可 -->
 	<key>NSCameraUsageDescription</key>
 	<string>Can I use the camera please?</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Can I use the mic please?</string>
+	
+	<!-- mach1-positional-example -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>	
+	<key>NSMotionUsageDescription</key>
+	<string>Uses IMU enabled devices supported by Apple&apos;s CoreMotionHeadphoneManager API to playback headtracking spatial audio properly.</string>
 </dict>
 </plist>

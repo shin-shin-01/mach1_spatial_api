@@ -3,19 +3,24 @@ import Flutter
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
+  var viewController: ViewController!
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     let controller :FlutterViewController = window?.rootViewController as! FlutterViewController
-    let cameraChannel = FlutterMethodChannel(name: "test_camera",
-                                            binaryMessenger: controller.binaryMessenger)
+    let audioChannel = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
 
-    cameraChannel.setMethodCallHandler({
+    audioChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         switch call.method {
-        case "getCamera":
-          self.receiveCamera(result: result,controller: controller)
+        case "playAudio":
+          // self.flutterViewController = FlutterViewController()
+          // let viewController = ViewController.init(rootViewController: self.flutterViewController!)
+          // self.window.rootViewController = viewController
+          // self.window.makeKeyAndVisible()
+          self.playAudio(result: result, controller: controller)
         default:
           result(FlutterMethodNotImplemented)
           return
@@ -26,10 +31,13 @@ import Flutter
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
- func receiveCamera(result: FlutterResult, controller: FlutterViewController) {
-    let pickerController = UIImagePickerController()
-    pickerController.sourceType = .camera
+ func playAudio(result: FlutterResult, controller: FlutterViewController) {
+    // let next = controller.storyboard?.instantiateViewController(withIdentifier: "ViewController")
+    // result(next!.playButton())
 
-    controller.present(pickerController,animated: true,completion: nil)
+    // // Fatal error: Unexpectedly found nil while implicitly unwrapping an Optional value
+    result(self.viewController.playButton())
+
+    // controller.present(self.viewController.playButton(), animated: true, completion: nil)
   }
 }

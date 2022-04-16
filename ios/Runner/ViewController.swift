@@ -46,6 +46,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     @IBOutlet weak var roll: UILabel!
 
     func playButton() {
+        print("start: ViewController.playButton()")
         if !isPlaying {
             var startDelayTime = 1.0
             var now = players[0].deviceCurrentTime
@@ -61,6 +62,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     }
     
     func stopButton() {
+        print("start: ViewController.stopButton()")
         for audioPlayer in players {
             audioPlayer.stop()
         }
@@ -107,12 +109,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
 
     // 最初に実行される箇所
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        let appDelegate:AppDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.viewController = self
-        
+    func initialize() {
         do {
             for i in 0...7 {
                 //load in the individual streams of audio from a Mach1 Spatial encoded audio file

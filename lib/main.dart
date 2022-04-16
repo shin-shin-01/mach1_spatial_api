@@ -42,6 +42,15 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> _stopAudio() async {
+    print("startMethod: _stopAudio");
+    try {
+      await platform.invokeMethod('stopAudio');
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +64,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               child: const Text('playAudio'),
               onPressed: _startAudio,
+            ),
+            ElevatedButton(
+              child: const Text('stopAudio'),
+              onPressed: _stopAudio,
             ),
           ],
         ),

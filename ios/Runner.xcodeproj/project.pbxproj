@@ -20,6 +20,7 @@
 		6C34174B280AC93C0083B77E /* 004.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C341742280AC93C0083B77E /* 004.aif */; };
 		6C34174C280AC93C0083B77E /* 005.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C341743280AC93C0083B77E /* 005.aif */; };
 		6C34174D280AC93C0083B77E /* stereo.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6C341744280AC93C0083B77E /* stereo.wav */; };
+		6C341751280BCD9C0083B77E /* CMDeviceMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -54,6 +55,7 @@
 		6C341742280AC93C0083B77E /* 004.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 004.aif; sourceTree = "<group>"; };
 		6C341743280AC93C0083B77E /* 005.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 005.aif; sourceTree = "<group>"; };
 		6C341744280AC93C0083B77E /* stereo.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stereo.wav; sourceTree = "<group>"; };
+		6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CMDeviceMotion.swift; sourceTree = "<group>"; };
 		6E0F1E92AEF2DD29A94A20B2 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */,
 				6C34173B280AC93C0083B77E /* Audio */,
 				6C34170A280AB0AA0083B77E /* ViewController.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
@@ -319,6 +322,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6C34170B280AB0AA0083B77E /* ViewController.swift in Sources */,
+				6C341751280BCD9C0083B77E /* CMDeviceMotion.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);

@@ -95,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
         divisions: 10,
         onChanged: (double val) => setState(() {
               x = val;
+              _startAudio();
             }));
   }
 
@@ -109,6 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
         divisions: 10,
         onChanged: (double val) => setState(() {
               y = val;
+              _startAudio();
             }));
   }
 
@@ -123,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
         divisions: 10,
         onChanged: (double val) => setState(() {
               z = val;
+              _startAudio();
             }));
   }
 }

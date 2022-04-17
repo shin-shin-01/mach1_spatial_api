@@ -21,21 +21,72 @@ private var motionManager = CMMotionManager()
 private var headphoneMotionManager = CMHeadphoneMotionManager()
 private var bUseCoreMotionHeadphones = false
 
-var m1Decode = Mach1Decode()
+var m1obj = Mach1DecodePositional()
 var stereoPlayer = AVAudioPlayer()
 
 var stereoActive = false
 var isYawActive = true
-var isPitchActive = false
-var isRollActive = false
+var isPitchActive = true
+var isRollActive = true
 var isPlaying = false
-var deviceYaw = 0.0
-var devicePitch = 0.0
-var deviceRoll = 0.0
+var cameraPitch : Float = 0
+var cameraYaw : Float = 0
+var cameraRoll : Float = 0
+
+// // -3 ~ 3
+// var sliderCameraX : Float = 0
+// var sliderCameraY : Float = 0
+// var sliderCameraZ : Float = -0.5
 
 private var audioEngine: AVAudioEngine = AVAudioEngine()
 private var mixer: AVAudioMixerNode = AVAudioMixerNode()
 var players: [AVAudioPlayer] = []
+
+var cameraPosition: Mach1Point3D = Mach1Point3D(x: 0, y: 0, z: 0)
+var objectPosition: Mach1Point3D = Mach1Point3D(x: 0, y: 0, z: 0)
+
+var cameraPositionOffset: Mach1Point3D = Mach1Point3D(x: 0, y: 0, z: 0)
+
+func mapFloat(value : Float, inMin : Float, inMax : Float, outMin : Float, outMax : Float) -> Float {
+    return (value - inMin) / (inMax - inMin) * (outMax - outMin) + outMin
+}
+
+func clampFloat(value : Float, min : Float, max : Float) -> Float {
+    return min > value ? min : max < value ? max : value
+}
+
+func getEuler(q1 : SCNVector4) -> float3
+{
+    var res = float3(0,0,0)
+    
+    let test = q1.x * q1.y + q1.z * q1.w
+    if (test > 0.499) // singularity at north pole
+    {
+        return float3(
+        0,
+        Float(2 * atan2(q1.x, q1.w)),
+        .pi / 2
+        ) * 180 / .pi
+    }
+    if (test < -0.499) // singularity at south pole
+    {
+        return float3(
+        0,
+        Float(-2 * atan2(q1.x, q1.w)),
+        -.pi / 2
+        ) * 180 / .pi
+    }
+    
+    let sqx = q1.x * q1.x
+    let sqy = q1.y * q1.y
+    let sqz = q1.z * q1.z
+    
+    res.x = Float(atan2(2 * q1.x * q1.w - 2 * q1.y * q1.z, 1 - 2 * sqx - 2 * sqz))
+    res.y = Float(atan2(2 * q1.y * q1.w - 2 * q1.x * q1.z, 1 - 2 * sqy - 2 * sqz))
+    res.z = Float(sin(2.0 * test))
+
+    return res * 180 / .pi
+}
 
 @available(iOS 14.0, *)
 class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
@@ -130,7 +181,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                 players[i * 2 + 1].prepareToPlay()
             }
             
-            //Mach1 Decode Setup
+            // ===========================
+            // Mach1 Decode Setup
+            // ===========================
             // Setup the correct angle convention for orientation Euler input angles
             // オイラー入力角度に正しい角度規則を設定する。
             m1Decode.setPlatformType(type: Mach1PlatformiOS)
@@ -142,6 +195,34 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             //1.0 = no filter | 0.1 = slow filter
             m1Decode.setFilterSpeed(filterSpeed: 0.95)
 
+            // ===========================
+            // Mach1 Decode Positional Setup
+            // ===========================
+            // Advanced Setting: used for blending 2 m1obj for crafting room ambiences
+            // 高度な設定：2つのm1objをブレンドしてルームアンビエンスを作成する際に使用します。
+            m1obj.setUseBlendMode(useBlendMode: false)
+            // Advanced Setting: ignore movements on height plane
+            // 高度な設定：高さ方向の動きを無視します。-> false
+            m1obj.setIgnoreTopBottom(ignoreTopBottom: false)
+            // Setting: mute audio when setListenerPosition position is outside of m1obj volume
+            // based on setDecoderAlgoPosition & setDecoderAlgoScale
+            // 設定：setListenerPositionの位置がm1objのボリュームの外にある場合、音声をミュートする。
+            // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています
+            m1obj.setMuteWhenOutsideObject(muteWhenOutsideObject: false)
+            // Setting: mute audio when setListenerPosition position is inside of m1obj volume
+            // based on setDecoderAlgoPosition & setDecoderAlgoScale
+            // 設定：setListenerPositionの位置がm1objのボリュームの内側にあるとき、音声をミュートする。
+            // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています。
+            m1obj.setMuteWhenInsideObject(muteWhenInsideObject: true)
+            // Setting: turn on/off distance attenuation of m1obj
+            // 設定：m1objの距離減衰のON/OFF。
+            m1obj.setUseAttenuation(useAttenuation: true)
+            // Advanced Setting: when on, positional rotation is calculated from the closest point
+            // of the m1obj's volume and not rotation from the center of m1obj.
+            // use this if you want the positional rotation tracking to be from a plane instead of from a point
+            // 詳細設定：オンにすると、位置の回転は、m1objの中心からの回転ではなく、
+            // m1objのボリュームの最も近い点から計算されます。
+            m1obj.setUsePlaneCalculation(bool: false)
         } catch {
             print (error)
         }
@@ -166,119 +247,132 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         } catch {
             print(error)
         }
-        
-        /// 警告: Mach1Decode APIから正確な再生を行うためには、UXに合わせてデバイスの向きを補正・管理する必要があります。
-    
-        /// Warning:
-        /// You're expected to correct and manage the orientation from devices in accordance with your UX
-        /// to get accurate playback from Mach1Decode API
-        /// https://dev.mach1.tech/#mach1-internal-angle-standard
-        
-        /// This example does not have motion management logic in place, it is expected
-        /// that the app will be launched on a tabletop and will assume 0 values for
-        /// yaw, pitch, roll upon launch. Rotating the device in portrait mode on table
-        /// is the expected usage.
-        
+
+
         /// This example declares 2 motion managers:
         /// `headphoneMotionManager` is for headphone IMU enalbed device
         /// `motionManager` is for the native device's IMU
-        /// `bUseCoreMotionHeadphones` is used to block the update thread of one of the two motion managers
-        ///  based on detection of supported IMU headphone devices
+        /// `bUseHeadphones` lazily swaps between both manager's orientation updates
 
-        headphoneMotionManager.delegate = self
-        
-        if (headphoneMotionManager.isDeviceMotionAvailable == true) || (motionManager.isDeviceMotionAvailable == true) {
-            let queue = OperationQueue()
+        /// この例では、2つのモーションマネージャを宣言しています。
+        /// `headphoneMotionManager` は、ヘッドフォン IMU 搭載デバイス用です。
+        /// `motionManager` はネイティブデバイスの IMU 用のものです。
+        /// `bUseHeadphones` は、両方のマネージャのオリエンテーションの更新を遅延して切り替えます。
+
+        motionManager = CMMotionManager()
+        headphoneMotionManager = CMHeadphoneMotionManager()
+        headphoneMotionManager.delegate = self    
+        if motionManager.isDeviceMotionAvailable == true {
             motionManager.deviceMotionUpdateInterval = 0.01
-            
+            let queue = OperationQueue()
             /// Start native IMU core motion manager thread
-            motionManager.startDeviceMotionUpdates(to: queue, withHandler: { [weak self] (motion, error) -> Void in
-                // block update thread unless all other motion managers are inactive
-                if (!bUseCoreMotionHeadphones && motionManager.isDeviceMotionAvailable) {
-                    // Get the attitudes of the device
-                    let attitude = motion?.attitude
-                    //Device orientation management
-                    deviceYaw = attitude!.yaw * 180 / .pi
-                    devicePitch = attitude!.pitch * 180 / .pi
-                    deviceRoll = attitude!.roll * 180 / .pi
-                    
-                    if isPlaying {
-                        //Send device orientation to m1obj with the preferred algo
-                        m1Decode.beginBuffer()
-                        m1Decode.setRotationDegrees(newRotationDegrees: Mach1Point3D(x: Float(-deviceYaw), y: Float(devicePitch), z: Float(deviceRoll)))
-                        let result: [Float] = m1Decode.decodeCoeffs()
-                        m1Decode.endBuffer()
-                                            
-                        //Use each coeff to decode multichannel Mach1 Spatial mix
-                        for i in 0...7 {
-                            players[i * 2].setVolume(Float(result[i * 2]), fadeDuration: 0)
-                            players[i * 2 + 1].setVolume(Float(result[i * 2 + 1]), fadeDuration: 0)
-                            //print(String(players[i * 2].currentTime) + " ; " + String(i * 2))
-                            //print(String(players[i * 2 + 1].currentTime) + " ; " + String(i * 2 + 1))
-                        }
-                    }
-                    
-                    //Mute stereo if off
-                    if (stereoActive) {
-                        stereoPlayer.setVolume(1.0, fadeDuration: 0.1)
-                    } else if (!stereoActive) {
-                        stereoPlayer.setVolume(0.0, fadeDuration: 0.1)
-                    }
-                    
-                    DispatchQueue.main.async() {
-                        // Return and display current corrected angle from Platform & filterspeed processing
-                        self?.yaw.text = String(m1Decode.getCurrentAngle().x)
-                        self?.pitch.text = String(m1Decode.getCurrentAngle().y)
-                        self?.roll.text = String(m1Decode.getCurrentAngle().z)
+            motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: queue, withHandler: { [weak self] (motion, error) -> Void in
+                if (bUseHeadphoneOrientationData && headphoneMotionManager.isDeviceMotionAvailable){
+                    headphoneMotionManager.startDeviceMotionUpdates(to: queue, withHandler: { [weak self] (headphonemotion, error) -> Void in
+                        // Get the attitudes of the device
+                        let quat = headphonemotion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
+
+                        // TODO: いる？いらない
+                        let angles = getEuler(q1: quat!)
+                        cameraYaw = angles.x
+                        cameraPitch = angles.y
+                        cameraRoll = angles.z
+                    })
+                    if (!headphoneMotionManager.isDeviceMotionActive) {
+                        bUseHeadphoneOrientationData = false
+                    } else {
+                        // Get the attitudes of the device
+                        let quat = motion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
+
+                        // TODO: いる？いらない？
+                        let angles = getEuler(q1: quat!)
+                        cameraYaw = angles.x
+                        cameraPitch = angles.y
+                        cameraRoll = angles.z
                     }
                 }
-            })
-            
-            /// Start headphone core motion manager thread
-            headphoneMotionManager.startDeviceMotionUpdates(to: queue, withHandler: { [weak self] (headphonemotion, error) -> Void in
-                // block update thread unless all other motion managers are inactive
-                if (bUseCoreMotionHeadphones && headphoneMotionManager.isDeviceMotionAvailable) {
-                    // Get the attitudes of the device
-                    let hpattitude = headphonemotion?.attitude
-                    //Device orientation management
-                    deviceYaw = hpattitude!.yaw * 180 / .pi
-                    devicePitch = hpattitude!.pitch * 180 / .pi
-                    deviceRoll = hpattitude!.roll * 180 / .pi
+
+                /// Warning:
+                /// You're expected to correct and manage the orientation from devices in accordance with your UX
+                /// to get accurate playback from Mach1Decode API
+                /// https://dev.mach1.tech/#mach1-internal-angle-standard
+                
+                /// This example does not have motion management logic in place, it is expected
+                /// that the app will be used in Portrait mode held in hand and will assume 0 values for
+                /// yaw, pitch, roll upon launch. Rotating the device in portrait mode
+                /// is the expected usage.
+
+                /// 警告
+                /// UXに合わせてデバイスからの向きを補正・管理することが求められる
+                /// Mach1Decode APIから正確な再生を得るために
+                /// https://dev.mach1.tech/#mach1-internal-angle-standard
+                
+                /// この例では、モーション管理ロジックを用意していません。アプリは手に持ってポートレートモードで使用し、
+                /// 起動時にヨー、ピッチ、ロールの値を0とすることが想定されています。
+                /// ポートレートモードでデバイスを回転させる が想定される使用方法です。
+
+
+                // get & set values from UI
+                // DispatchQueue -> 非同期処理
+                DispatchQueue.main.async() {
+                    self?.labelCameraYaw.text = String(m1obj.getCurrentAngle().x)
+                    self?.labelCameraPitch.text = String(m1obj.getCurrentAngle().y)
+                    self?.labelCameraRoll.text = String(m1obj.getCurrentAngle().z)
                     
-                    if isPlaying {
-                        //Send device orientation to m1obj with the preferred algo
-                        m1Decode.beginBuffer()
-                        m1Decode.setRotationDegrees(newRotationDegrees: Mach1Point3D(x: Float(deviceYaw), y: Float(devicePitch), z: Float(deviceRoll)))
-                        let result: [Float] = m1Decode.decodeCoeffs()
-                        m1Decode.endBuffer()
-                                            
-                        //Use each coeff to decode multichannel Mach1 Spatial mix
-                        for i in 0...7 {
-                            players[i * 2].setVolume(Float(result[i * 2]), fadeDuration: 0)
-                            players[i * 2 + 1].setVolume(Float(result[i * 2 + 1]), fadeDuration: 0)
-                            //print(String(players[i * 2].currentTime) + " ; " + String(i * 2))
-                            //print(String(players[i * 2 + 1].currentTime) + " ; " + String(i * 2 + 1))
-                        }
-                    }
-                    
-                    //Mute stereo if off
-                    if (stereoActive) {
-                        stereoPlayer.setVolume(1.0, fadeDuration: 0.1)
-                    } else if (!stereoActive) {
-                        stereoPlayer.setVolume(0.0, fadeDuration: 0.1)
-                    }
-                    
-                    DispatchQueue.main.async() {
-                        // Return and display current corrected angle from Platform & filterspeed processing
-                        self?.yaw.text = String(m1Decode.getCurrentAngle().x)
-                        self?.pitch.text = String(m1Decode.getCurrentAngle().y)
-                        self?.roll.text = String(m1Decode.getCurrentAngle().z)
-                    }
+                    // ここの x, y, z を flutter側から与える？
+                    cameraPosition = Mach1Point3D(
+                        x: (self?.sliderCameraX.value)! + cameraPositionOffset.x,
+                        y: (self?.sliderCameraY.value)! + cameraPositionOffset.y,
+                        z: (self?.sliderCameraZ.value)! + cameraPositionOffset.z
+                    )
+                }
+
+                //Mute stereo if off
+                if (stereoActive) {
+                    stereoPlayer.setVolume(1.0, fadeDuration: 0.1)
+                } else if (!stereoActive) {
+                    stereoPlayer.setVolume(0.0, fadeDuration: 0.1)
+                }
+
+                // ここで位置情報から音声の設定をしてそう
+                //Send device orientation to m1obj with the preferred algo
+                m1obj.setListenerPosition(point: (cameraPosition))
+                m1obj.setListenerRotation(point: Mach1Point3D(x: cameraYaw, y: cameraPitch, z: cameraRoll))
+                m1obj.setDecoderAlgoPosition(point: (objectPosition))
+                m1obj.setDecoderAlgoRotation(point: Mach1Point3D(x: 0, y: 0, z: 0))
+                m1obj.setDecoderAlgoScale(point: Mach1Point3D(x: 0.1, y: 0.1, z: 0.1))
+                //Setting: on/off yaw rotations from position
+                m1obj.setUseYawForRotation(bool: isYawActive)
+                //Setting: on/off pitch rotations from position
+                m1obj.setUsePitchForRotation(bool: isPitchActive)
+                //Setting: on/off roll rotations frok om position
+                m1obj.setUseRollForRotation(bool: isRollActive)
+
+                m1obj.evaluatePositionResults()
+
+
+                // compute attenuation linear curve - project dist [0:1] to [1:0] interval
+                // 減衰リニアカーブの計算 - 距離 [0:1] から [1:0] 区間への投影
+                var attenuation : Float = m1obj.getDist()
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 3, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 3)
+                //m1obj.setUseAttenuation(useAttenuation: false)
+                m1obj.setAttenuationCurve(attenuationCurve: attenuation)
+                //print(attenuation)
+
+                var decodeArray: [Float] = Array(repeating: 0.0, count: 18)
+                m1obj.getCoefficients(result: &decodeArray)
+                //print(decodeArray)
+                
+                //Use each coeff to decode multichannel Mach1 Spatial mix
+                for i in 0...7 {
+                    players[i * 2].setVolume(Float(decodeArray[i * 2]), fadeDuration: 0)
+                    players[i * 2 + 1].setVolume(Float(decodeArray[i * 2 + 1]), fadeDuration: 0)
                 }
             })
-            print("Device coremotion started")
+            print("Device motion started")
         } else {
-            print("Device coremotion unavailable");
+            print("Device motion unavailable");
         }
     }
 }

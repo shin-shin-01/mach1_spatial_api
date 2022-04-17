@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:flutter/services.dart';
 
 void main() {
@@ -33,10 +32,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('audio');
 
+  double x = 0.0;
+  double y = 0.0;
+  double z = 0.0;
+
   Future<void> _startAudio() async {
     print("startMethod: _startAudio");
     try {
-      await platform.invokeMethod('playAudio');
+      await platform.invokeMethod('playAudio', [x, y, z]);
     } on PlatformException catch (e) {
       print(e);
     }
@@ -69,9 +72,57 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Text('stopAudio'),
               onPressed: _stopAudio,
             ),
+            const Text('x'),
+            _xSlider(),
+            const Text('y'),
+            _ySlider(),
+            const Text('z'),
+            _zSlider()
           ],
         ),
       ),
     );
+  }
+
+  Widget _xSlider() {
+    return Slider(
+        label: x.toStringAsFixed(2),
+        min: -3,
+        max: 3,
+        value: x,
+        activeColor: Colors.blueAccent,
+        inactiveColor: Colors.grey,
+        divisions: 10,
+        onChanged: (double val) => setState(() {
+              x = val;
+            }));
+  }
+
+  Widget _ySlider() {
+    return Slider(
+        label: y.toStringAsFixed(2),
+        min: -3,
+        max: 3,
+        value: y,
+        activeColor: Colors.blueAccent,
+        inactiveColor: Colors.grey,
+        divisions: 10,
+        onChanged: (double val) => setState(() {
+              y = val;
+            }));
+  }
+
+  Widget _zSlider() {
+    return Slider(
+        label: z.toStringAsFixed(2),
+        min: -3,
+        max: 3,
+        value: z,
+        activeColor: Colors.blueAccent,
+        inactiveColor: Colors.grey,
+        divisions: 10,
+        onChanged: (double val) => setState(() {
+              z = val;
+            }));
   }
 }

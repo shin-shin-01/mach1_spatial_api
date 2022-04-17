@@ -17,7 +17,8 @@ import Flutter
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         switch call.method {
         case "playAudio":
-          self.playAudio(result: result, controller: controller)
+          let args = call.arguments as! Array<NSNumber>;
+          self.playAudio(result: result, controller: controller, x: args[0].floatValue, y: args[1].floatValue, z: args[2].floatValue)
         case "stopAudio":
           self.stopAudio(result: result, controller: controller)
         default:
@@ -30,8 +31,8 @@ import Flutter
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
- func playAudio(result: FlutterResult, controller: FlutterViewController) {
-    ViewController().playButton()
+ func playAudio(result: FlutterResult, controller: FlutterViewController, x: Float, y: Float, z: Float) {
+    ViewController().playButton(x: x, y: y, z: z)
     // https://github.com/florent37/Flutter-AssetsAudioPlayer/blob/4ead5eb3ac7b7059507c72418df22251fedd92fe/darwin/Classes/Music.swift#L1070
     result(true)
   }

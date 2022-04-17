@@ -9,8 +9,8 @@
 import UIKit
 import CoreMotion
 import AVFoundation
+import SceneKit
 import Mach1SpatialAPI
-import UIKit
 
 /// As of 11/11/2021 the recommended minimum iOS target is 14.0 to make the examples
 /// compatible with Headphone Motion Manager API from Apple.
@@ -19,7 +19,7 @@ import UIKit
 private var motionManager = CMMotionManager()
 @available(iOS 14.0, *)
 private var headphoneMotionManager = CMHeadphoneMotionManager()
-private var bUseCoreMotionHeadphones = false
+private var bUseHeadphoneOrientationData = false
 
 var m1obj = Mach1DecodePositional()
 var stereoPlayer = AVAudioPlayer()
@@ -33,10 +33,6 @@ var cameraPitch : Float = 0
 var cameraYaw : Float = 0
 var cameraRoll : Float = 0
 
-// // -3 ~ 3
-// var sliderCameraX : Float = 0
-// var sliderCameraY : Float = 0
-// var sliderCameraZ : Float = -0.5
 
 private var audioEngine: AVAudioEngine = AVAudioEngine()
 private var mixer: AVAudioMixerNode = AVAudioMixerNode()
@@ -96,12 +92,27 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     @IBOutlet weak var pitch: UILabel!
     @IBOutlet weak var roll: UILabel!
 
-    func playButton() {
+    func playButton(x: Float, y: Float, z: Float) {
+        // ==============
+        // TEST
+        // ==============
+        cameraPosition = Mach1Point3D(
+            x: x + cameraPositionOffset.x,
+            y: y + cameraPositionOffset.y,
+            z: z + cameraPositionOffset.z
+        )
+        //Send device orientation to m1obj with the preferred algo
+        m1obj.setListenerPosition(point: (cameraPosition))
+        m1obj.setListenerRotation(point: Mach1Point3D(x: cameraYaw, y: cameraPitch, z: cameraRoll))
+        m1obj.setDecoderAlgoPosition(point: (objectPosition))
+        m1obj.setDecoderAlgoRotation(point: Mach1Point3D(x: 0, y: 0, z: 0))
+        m1obj.setDecoderAlgoScale(point: Mach1Point3D(x: 0.1, y: 0.1, z: 0.1))
+
         print("start: ViewController.playButton()")
         if !isPlaying {
-            var startDelayTime = 1.0
-            var now = players[0].deviceCurrentTime
-            var startTime = now + startDelayTime
+            let startDelayTime = 1.0
+            let now = players[0].deviceCurrentTime
+            let startTime = now + startDelayTime
             print (startTime)
             for audioPlayer in players {
                 audioPlayer.play(atTime: startTime)
@@ -131,9 +142,6 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     // @IBAction func staticStereoActive(_ sender: Any) {
     //     stereoActive = !stereoActive
     // }
-    // @IBAction func headphoneIMUActive(_ sender: Any) {
-    //     bUseCoreMotionHeadphones = UseHeadphoneOrientationDataSwitch.isOn
-    // }
     // @IBAction func yawActive(_ sender: Any) {
     //     isYawActive = !isYawActive
     // }
@@ -145,17 +153,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     // }
     // func headphoneMotionManagerDidConnect(_ manager: CMHeadphoneMotionManager) {
     //     print("connect")
-    //     bUseCoreMotionHeadphones = true
-    //     DispatchQueue.main.async() {
-    //         self.UseHeadphoneOrientationDataSwitch.setOn(bUseCoreMotionHeadphones, animated: true)
-    //     }
     // }
     // func headphoneMotionManagerDidDisconnect(_ manager: CMHeadphoneMotionManager) {
     //     print("disconnect")
-    //     bUseCoreMotionHeadphones = false
-    //     DispatchQueue.main.async() {
-    //         self.UseHeadphoneOrientationDataSwitch.setOn(bUseCoreMotionHeadphones, animated: true)
-    //     }
     // }
 
 
@@ -186,14 +186,14 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             // ===========================
             // Setup the correct angle convention for orientation Euler input angles
             // オイラー入力角度に正しい角度規則を設定する。
-            m1Decode.setPlatformType(type: Mach1PlatformiOS)
+            m1obj.setPlatformType(type: Mach1PlatformiOS)
             // Setup the expected spatial audio mix format for decoding
             // デコード時に想定される空間音声のミックス形式を設定する。
-            m1Decode.setDecodeAlgoType(newAlgorithmType: Mach1DecodeAlgoSpatial)
+            m1obj.setDecodeAlgoType(newAlgorithmType: Mach1DecodeAlgoSpatial)
             // Setup for the safety filter speed:
             // セーフティーフィルターの回転数の設定
             //1.0 = no filter | 0.1 = slow filter
-            m1Decode.setFilterSpeed(filterSpeed: 0.95)
+            m1obj.setFilterSpeed(filterSpeed: 0.95)
 
             // ===========================
             // Mach1 Decode Positional Setup
@@ -272,7 +272,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                         // Get the attitudes of the device
                         let quat = headphonemotion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
 
-                        // TODO: いる？いらない
+                        // TODO: ここの意味ちゃんと分析する
                         let angles = getEuler(q1: quat!)
                         cameraYaw = angles.x
                         cameraPitch = angles.y
@@ -284,7 +284,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                         // Get the attitudes of the device
                         let quat = motion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
 
-                        // TODO: いる？いらない？
+                        // TODO: ここの意味ちゃんと分析する
                         let angles = getEuler(q1: quat!)
                         cameraYaw = angles.x
                         cameraPitch = angles.y
@@ -310,22 +310,6 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                 /// この例では、モーション管理ロジックを用意していません。アプリは手に持ってポートレートモードで使用し、
                 /// 起動時にヨー、ピッチ、ロールの値を0とすることが想定されています。
                 /// ポートレートモードでデバイスを回転させる が想定される使用方法です。
-
-
-                // get & set values from UI
-                // DispatchQueue -> 非同期処理
-                DispatchQueue.main.async() {
-                    self?.labelCameraYaw.text = String(m1obj.getCurrentAngle().x)
-                    self?.labelCameraPitch.text = String(m1obj.getCurrentAngle().y)
-                    self?.labelCameraRoll.text = String(m1obj.getCurrentAngle().z)
-                    
-                    // ここの x, y, z を flutter側から与える？
-                    cameraPosition = Mach1Point3D(
-                        x: (self?.sliderCameraX.value)! + cameraPositionOffset.x,
-                        y: (self?.sliderCameraY.value)! + cameraPositionOffset.y,
-                        z: (self?.sliderCameraZ.value)! + cameraPositionOffset.z
-                    )
-                }
 
                 //Mute stereo if off
                 if (stereoActive) {

@@ -93,20 +93,11 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     @IBOutlet weak var roll: UILabel!
 
     func playButton(x: Float, y: Float, z: Float) {
-        // ==============
-        // TEST
-        // ==============
         cameraPosition = Mach1Point3D(
             x: x + cameraPositionOffset.x,
             y: y + cameraPositionOffset.y,
             z: z + cameraPositionOffset.z
         )
-        //Send device orientation to m1obj with the preferred algo
-        m1obj.setListenerPosition(point: (cameraPosition))
-        m1obj.setListenerRotation(point: Mach1Point3D(x: cameraYaw, y: cameraPitch, z: cameraRoll))
-        m1obj.setDecoderAlgoPosition(point: (objectPosition))
-        m1obj.setDecoderAlgoRotation(point: Mach1Point3D(x: 0, y: 0, z: 0))
-        m1obj.setDecoderAlgoScale(point: Mach1Point3D(x: 0.1, y: 0.1, z: 0.1))
 
         print("start: ViewController.playButton()")
         if !isPlaying {

@@ -63,7 +63,15 @@
 	<array>
 		<string>armv7</string>
 	</array>	
+	<!-- https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager -->
+	<!-- If you don’t include a usage description string, your app crashes when you use this class. -->
 	<key>NSMotionUsageDescription</key>
 	<string>Uses IMU enabled devices supported by Apple&apos;s CoreMotionHeadphoneManager API to playback headtracking spatial audio properly.</string>
+
+	<!-- geolocator -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to location when open.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to location when in the background.</string>
 </dict>
 </plist>

@@ -1,9 +1,18 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // 向き指定
+  // it is expected that the app will be used in Portrait mode held in hand and will assume 0 values for...
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const MyApp());
 }
 
@@ -35,6 +44,25 @@ class _MyHomePageState extends State<MyHomePage> {
   double x = 0.0;
   double y = 0.0;
   double z = 0.0;
+  double latitude = 0.0;
+  double longitude = 0.0;
+
+  final LocationSettings locationSettings =
+      const LocationSettings(accuracy: LocationAccuracy.best);
+
+  @override
+  void initState() async {
+    super.initState();
+    await checkPermission();
+
+    Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen((Position? position) async {
+      if (position != null) {
+        await setDistanceFromPosition(position);
+        await _startAudio();
+      }
+    });
+  }
 
   Future<void> _startAudio() async {
     print("startMethod: _startAudio");
@@ -45,14 +73,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> _stopAudio() async {
-    print("startMethod: _stopAudio");
-    try {
-      await platform.invokeMethod('stopAudio');
-    } on PlatformException catch (e) {
-      print(e);
-    }
-  }
+  // Future<void> _stopAudio() async {
+  //   print("startMethod: _stopAudio");
+  //   try {
+  //     await platform.invokeMethod('stopAudio');
+  //   } on PlatformException catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -64,68 +92,61 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'Audio!',
             ),
-            ElevatedButton(
-              child: const Text('playAudio'),
-              onPressed: _startAudio,
-            ),
-            ElevatedButton(
-              child: const Text('stopAudio'),
-              onPressed: _stopAudio,
-            ),
-            const Text('x'),
-            _xSlider(),
-            const Text('y'),
-            _ySlider(),
-            const Text('z'),
-            _zSlider()
+            // ElevatedButton(
+            //   child: const Text('playAudio'),
+            //   onPressed: _startAudio,
+            // ),
+            // ElevatedButton(
+            //   child: const Text('stopAudio'),
+            //   onPressed: _stopAudio,
+            // ),
+            Text('x: $x'),
+            Text('y: $y'),
+            Text('z: $z'),
+            const SizedBox(height: 50),
+            Text('Latitude: $latitude'),
+            Text('Longitude: $longitude'),
           ],
         ),
       ),
     );
   }
 
-  Widget _xSlider() {
-    return Slider(
-        label: x.toStringAsFixed(2),
-        min: -3,
-        max: 3,
-        value: x,
-        activeColor: Colors.blueAccent,
-        inactiveColor: Colors.grey,
-        divisions: 10,
-        onChanged: (double val) => setState(() {
-              x = val;
-              _startAudio();
-            }));
+  // 位置情報の許可を得る
+  Future<void> checkPermission() async {
+    LocationPermission permission;
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
+        return Future.error('Location Not Available');
+      }
+    }
   }
 
-  Widget _ySlider() {
-    return Slider(
-        label: y.toStringAsFixed(2),
-        min: -3,
-        max: 3,
-        value: y,
-        activeColor: Colors.blueAccent,
-        inactiveColor: Colors.grey,
-        divisions: 10,
-        onChanged: (double val) => setState(() {
-              y = val;
-              _startAudio();
-            }));
-  }
+  // 位置情報から対象オブジェクトへの距離を x, y で出力
+  Future<void> setDistanceFromPosition(Position position) async {
+    // 大濠公園入口
+    double objectLatitude = 33.59012176;
+    double objectLongitude = 130.37748086;
 
-  Widget _zSlider() {
-    return Slider(
-        label: z.toStringAsFixed(2),
-        min: -3,
-        max: 3,
-        value: z,
-        activeColor: Colors.blueAccent,
-        inactiveColor: Colors.grey,
-        divisions: 10,
-        onChanged: (double val) => setState(() {
-              z = val;
-              _startAudio();
-            }));
+    setState(() {
+      latitude = position.latitude;
+      longitude = position.longitude;
+    });
+
+    double xDistanceInMeters = Geolocator.distanceBetween(
+        latitude, longitude, objectLatitude, longitude); // x軸方向の距離を計算
+    double yDistanceInMeters = Geolocator.distanceBetween(
+        latitude, longitude, latitude, objectLongitude); // y軸方向の距離を計算
+
+    setState(() {
+      x = position.latitude < objectLatitude
+          ? xDistanceInMeters
+          : -xDistanceInMeters;
+      y = position.longitude < objectLongitude
+          ? yDistanceInMeters
+          : -yDistanceInMeters;
+    });
   }
 }

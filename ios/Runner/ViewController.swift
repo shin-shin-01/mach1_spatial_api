@@ -19,15 +19,11 @@ import Mach1SpatialAPI
 private var motionManager = CMMotionManager()
 @available(iOS 14.0, *)
 private var headphoneMotionManager = CMHeadphoneMotionManager()
-private var bUseHeadphoneOrientationData = false
+private var bUseHeadphoneOrientationData = true // AirPodsの方位データを使用する
 
 var m1obj = Mach1DecodePositional()
 var stereoPlayer = AVAudioPlayer()
 
-var stereoActive = false
-var isYawActive = true
-var isPitchActive = true
-var isRollActive = true
 var isPlaying = false
 var cameraPitch : Float = 0
 var cameraYaw : Float = 0
@@ -160,14 +156,14 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                 // この例では、マルチチャンネル（8チャンネル）のオーディオファイルを個々のストリームにデコードした場合を想定しています。
                 players.append(try AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: "00" + String(i), ofType: "aif")!)))
                 players.append(try AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: "00" + String(i), ofType: "aif")!)))
-                
+
                 players[i * 2].numberOfLoops = 10
                 players[i * 2 + 1].numberOfLoops = 10
-                
+
                 //the Mach1Decode function 8*2 channels to correctly recreate the stereo image
                 players[i * 2].pan = -1.0;
                 players[i * 2 + 1].pan = 1.0;
-                
+
                 players[i * 2].prepareToPlay()
                 players[i * 2 + 1].prepareToPlay()
             }
@@ -240,47 +236,41 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         }
 
 
-        /// This example declares 2 motion managers:
         /// `headphoneMotionManager` is for headphone IMU enalbed device
         /// `motionManager` is for the native device's IMU
         /// `bUseHeadphones` lazily swaps between both manager's orientation updates
-
-        /// この例では、2つのモーションマネージャを宣言しています。
-        /// `headphoneMotionManager` は、ヘッドフォン IMU 搭載デバイス用です。
-        /// `motionManager` はネイティブデバイスの IMU 用のものです。
-        /// `bUseHeadphones` は、両方のマネージャのオリエンテーションの更新を遅延して切り替えます。
-
         motionManager = CMMotionManager()
         headphoneMotionManager = CMHeadphoneMotionManager()
         headphoneMotionManager.delegate = self    
         if motionManager.isDeviceMotionAvailable == true {
+            // データの更新頻度 (The interval, in seconds, ...)
+            // https://developer.apple.com/documentation/coremotion/cmmotionmanager/1616065-devicemotionupdateinterval
             motionManager.deviceMotionUpdateInterval = 0.01
             let queue = OperationQueue()
             /// Start native IMU core motion manager thread
+            /// ヘッドホンから情報が取得できるならそれを利用し, そうでない場合にデバイスの情報を取得する
             motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: queue, withHandler: { [weak self] (motion, error) -> Void in
                 if (bUseHeadphoneOrientationData && headphoneMotionManager.isDeviceMotionAvailable){
                     headphoneMotionManager.startDeviceMotionUpdates(to: queue, withHandler: { [weak self] (headphonemotion, error) -> Void in
                         // Get the attitudes of the device
                         let quat = headphonemotion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
 
-                        // TODO: ここの意味ちゃんと分析する
                         let angles = getEuler(q1: quat!)
                         cameraYaw = angles.x
                         cameraPitch = angles.y
                         cameraRoll = angles.z
                     })
                     if (!headphoneMotionManager.isDeviceMotionActive) {
-                        bUseHeadphoneOrientationData = false
-                    } else {
-                        // Get the attitudes of the device
-                        let quat = motion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
-
-                        // TODO: ここの意味ちゃんと分析する
-                        let angles = getEuler(q1: quat!)
-                        cameraYaw = angles.x
-                        cameraPitch = angles.y
-                        cameraRoll = angles.z
+                        bUseHeadphoneOrientationData = false // AirPodsからデータが更新されていなかったら, false
                     }
+                } else {
+                    // Get the attitudes of the device
+                    let quat = motion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
+
+                    let angles = getEuler(q1: quat!)
+                    cameraYaw = angles.x
+                    cameraPitch = angles.y
+                    cameraRoll = angles.z
                 }
 
                 /// Warning:
@@ -293,52 +283,31 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                 /// yaw, pitch, roll upon launch. Rotating the device in portrait mode
                 /// is the expected usage.
 
-                /// 警告
-                /// UXに合わせてデバイスからの向きを補正・管理することが求められる
-                /// Mach1Decode APIから正確な再生を得るために
-                /// https://dev.mach1.tech/#mach1-internal-angle-standard
-                
-                /// この例では、モーション管理ロジックを用意していません。アプリは手に持ってポートレートモードで使用し、
-                /// 起動時にヨー、ピッチ、ロールの値を0とすることが想定されています。
-                /// ポートレートモードでデバイスを回転させる が想定される使用方法です。
+                stereoPlayer.setVolume(1.0, fadeDuration: 0.1) // stereoActive: True
 
-                //Mute stereo if off
-                if (stereoActive) {
-                    stereoPlayer.setVolume(1.0, fadeDuration: 0.1)
-                } else if (!stereoActive) {
-                    stereoPlayer.setVolume(0.0, fadeDuration: 0.1)
-                }
-
-                // ここで位置情報から音声の設定をしてそう
                 //Send device orientation to m1obj with the preferred algo
-                m1obj.setListenerPosition(point: (cameraPosition))
-                m1obj.setListenerRotation(point: Mach1Point3D(x: cameraYaw, y: cameraPitch, z: cameraRoll))
-                m1obj.setDecoderAlgoPosition(point: (objectPosition))
-                m1obj.setDecoderAlgoRotation(point: Mach1Point3D(x: 0, y: 0, z: 0))
-                m1obj.setDecoderAlgoScale(point: Mach1Point3D(x: 0.1, y: 0.1, z: 0.1))
-                //Setting: on/off yaw rotations from position
-                m1obj.setUseYawForRotation(bool: isYawActive)
-                //Setting: on/off pitch rotations from position
-                m1obj.setUsePitchForRotation(bool: isPitchActive)
-                //Setting: on/off roll rotations frok om position
-                m1obj.setUseRollForRotation(bool: isRollActive)
+                m1obj.setListenerPosition(point: (cameraPosition)) // 自身の位置
+                m1obj.setListenerRotation(point: Mach1Point3D(x: cameraYaw, y: cameraPitch, z: cameraRoll)) // 回転角: AirPods or iPhone
+                m1obj.setDecoderAlgoPosition(point: (objectPosition)) // 対象物の位置
+                m1obj.setDecoderAlgoRotation(point: Mach1Point3D(x: 0, y: 0, z: 0)) // 対象物の角度
+                m1obj.setDecoderAlgoScale(point: Mach1Point3D(x: 0.1, y: 0.1, z: 0.1)) // 対象物の大きさ？
+                
+                //ロール・ピッチ・ヨー: x軸-・y軸・z軸の順で回転
+                m1obj.setUseYawForRotation(bool: true)
+                m1obj.setUsePitchForRotation(bool: true)
+                m1obj.setUseRollForRotation(bool: true)
 
                 m1obj.evaluatePositionResults()
 
-
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
-                // 減衰リニアカーブの計算 - 距離 [0:1] から [1:0] 区間への投影
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 3, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 3)
-                //m1obj.setUseAttenuation(useAttenuation: false)
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 10, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 10) // 10メートル？
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
-                //print(attenuation)
 
                 var decodeArray: [Float] = Array(repeating: 0.0, count: 18)
                 m1obj.getCoefficients(result: &decodeArray)
-                //print(decodeArray)
-                
+
                 //Use each coeff to decode multichannel Mach1 Spatial mix
                 for i in 0...7 {
                     players[i * 2].setVolume(Float(decodeArray[i * 2]), fadeDuration: 0)

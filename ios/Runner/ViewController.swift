@@ -83,6 +83,7 @@ func getEuler(q1 : SCNVector4) -> float3
 @available(iOS 14.0, *)
 class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     
+    @IBOutlet var soundTypeSegmentedControl: UISegmentedControl?
     @IBOutlet weak var UseHeadphoneOrientationDataSwitch: UISwitch!
     @IBOutlet weak var yaw: UILabel!
     @IBOutlet weak var pitch: UILabel!
@@ -100,7 +101,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             let startDelayTime = 1.0
             let now = players[0].deviceCurrentTime
             let startTime = now + startDelayTime
-            print (startTime)
+            
             for audioPlayer in players {
                 audioPlayer.play(atTime: startTime)
             }
@@ -115,12 +116,13 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         for audioPlayer in players {
             audioPlayer.stop()
         }
+        
         isPlaying = false
         //stereoPlayer.stop()
         // prep files for next play
-        for i in 0...7 {
-            players[i * 2].prepareToPlay()
-            players[i * 2 + 1].prepareToPlay()
+        for i in stride(from: 0, to: players.count, by: 2) {
+            players[i + 0].prepareToPlay()
+            players[i + 1].prepareToPlay()
         }
         //stereoPlayer.prepareToPlay()
     }
@@ -149,24 +151,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     // 最初に実行される箇所
     func initialize() {
         do {
-            for i in 0...7 {
-                //load in the individual streams of audio from a Mach1 Spatial encoded audio file
-                //this example assumes you have decoded the multichannel (8channel) audio file into individual streams
-                // Mach1 Spatialでエンコードされたオーディオファイルから、個々のストリームを読み込む。
-                // この例では、マルチチャンネル（8チャンネル）のオーディオファイルを個々のストリームにデコードした場合を想定しています。
-                players.append(try AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: "00" + String(i), ofType: "aif")!)))
-                players.append(try AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: "00" + String(i), ofType: "aif")!)))
-
-                players[i * 2].numberOfLoops = 10
-                players[i * 2 + 1].numberOfLoops = 10
-
-                //the Mach1Decode function 8*2 channels to correctly recreate the stereo image
-                players[i * 2].pan = -1.0;
-                players[i * 2 + 1].pan = 1.0;
-
-                players[i * 2].prepareToPlay()
-                players[i * 2 + 1].prepareToPlay()
-            }
+            Encoder().setup()
+            players = Encoder().setupPlayers()
             
             // ===========================
             // Mach1 Decode Setup
@@ -259,6 +245,13 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                         cameraYaw = angles.x
                         cameraPitch = angles.y
                         cameraRoll = angles.z
+
+                        // TODO: ここがちゃんと反映されているか確認する
+                        print("======================")
+                        print(cameraYaw)
+                        print(cameraPitch)
+                        print(cameraRoll)
+
                     })
                     if (!headphoneMotionManager.isDeviceMotionActive) {
                         bUseHeadphoneOrientationData = false // AirPodsからデータが更新されていなかったら, false
@@ -301,15 +294,15 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 10, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 10) // 10メートル？
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 100, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 100) // 100メートル？
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
 
                 var decodeArray: [Float] = Array(repeating: 0.0, count: 18)
                 m1obj.getCoefficients(result: &decodeArray)
 
                 //Use each coeff to decode multichannel Mach1 Spatial mix
-                for i in 0...7 {
+                for i in stride(from: 0, to: players.count, by: 2) {
                     players[i * 2].setVolume(Float(decodeArray[i * 2]), fadeDuration: 0)
                     players[i * 2 + 1].setVolume(Float(decodeArray[i * 2 + 1]), fadeDuration: 0)
                 }

@@ -51,16 +51,19 @@ class _MyHomePageState extends State<MyHomePage> {
       const LocationSettings(accuracy: LocationAccuracy.best);
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
-    await checkPermission();
 
-    Geolocator.getPositionStream(locationSettings: locationSettings)
-        .listen((Position? position) async {
-      if (position != null) {
-        await setDistanceFromPosition(position);
-        await _startAudio();
-      }
+    Future(() async {
+      await checkPermission();
+
+      Geolocator.getPositionStream(locationSettings: locationSettings)
+          .listen((Position? position) async {
+        if (position != null) {
+          await setDistanceFromPosition(position);
+          await _startAudio();
+        }
+      });
     });
   }
 

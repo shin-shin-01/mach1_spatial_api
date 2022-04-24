@@ -22,16 +22,12 @@ private var headphoneMotionManager = CMHeadphoneMotionManager()
 private var bUseHeadphoneOrientationData = true // AirPodsの方位データを使用する
 
 var m1obj = Mach1DecodePositional()
-var stereoPlayer = AVAudioPlayer()
 
 var isPlaying = false
 var cameraPitch : Float = 0
 var cameraYaw : Float = 0
 var cameraRoll : Float = 0
 
-
-private var audioEngine: AVAudioEngine = AVAudioEngine()
-private var mixer: AVAudioMixerNode = AVAudioMixerNode()
 var players: [AVAudioPlayer] = []
 
 var cameraPosition: Mach1Point3D = Mach1Point3D(x: 0, y: 0, z: 0)
@@ -82,71 +78,40 @@ func getEuler(q1 : SCNVector4) -> float3
 
 @available(iOS 14.0, *)
 class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
-    
-    @IBOutlet var soundTypeSegmentedControl: UISegmentedControl?
-    @IBOutlet weak var UseHeadphoneOrientationDataSwitch: UISwitch!
-    @IBOutlet weak var yaw: UILabel!
-    @IBOutlet weak var pitch: UILabel!
-    @IBOutlet weak var roll: UILabel!
 
-    func playButton(x: Float, y: Float, z: Float) {
+    func playAudio(x: Float, y: Float, z: Float) {
         cameraPosition = Mach1Point3D(
             x: x + cameraPositionOffset.x,
             y: y + cameraPositionOffset.y,
             z: z + cameraPositionOffset.z
         )
 
-        print("start: ViewController.playButton()")
+        print("start: ViewController.playAudio()")
         if !isPlaying {
             let startDelayTime = 1.0
             let now = players[0].deviceCurrentTime
             let startTime = now + startDelayTime
-            
             for audioPlayer in players {
                 audioPlayer.play(atTime: startTime)
             }
-            //stereoPlayer.play()
             print("isPlaying")
             isPlaying = true
         }
     }
     
-    func stopButton() {
-        print("start: ViewController.stopButton()")
+    func stopAudio() {
+        print("start: ViewController.stopAudio()")
         for audioPlayer in players {
             audioPlayer.stop()
         }
         
         isPlaying = false
-        //stereoPlayer.stop()
         // prep files for next play
         for i in stride(from: 0, to: players.count, by: 2) {
             players[i + 0].prepareToPlay()
             players[i + 1].prepareToPlay()
         }
-        //stereoPlayer.prepareToPlay()
     }
-
-    // // CommentOut
-    // @IBAction func staticStereoActive(_ sender: Any) {
-    //     stereoActive = !stereoActive
-    // }
-    // @IBAction func yawActive(_ sender: Any) {
-    //     isYawActive = !isYawActive
-    // }
-    // @IBAction func pitchActive(_ sender: Any) {
-    //     isPitchActive = !isPitchActive
-    // }
-    // @IBAction func rollActive(_ sender: Any) {
-    //     isRollActive = !isRollActive
-    // }
-    // func headphoneMotionManagerDidConnect(_ manager: CMHeadphoneMotionManager) {
-    //     print("connect")
-    // }
-    // func headphoneMotionManagerDidDisconnect(_ manager: CMHeadphoneMotionManager) {
-    //     print("disconnect")
-    // }
-
 
     // 最初に実行される箇所
     func initialize() {
@@ -199,19 +164,6 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         } catch {
             print (error)
         }
-        
-        //Static Stereo
-        do{
-            stereoPlayer = try AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: "stereo", ofType: "wav")!))
-        } catch {
-            print(error)
-        }
-        stereoPlayer.prepareToPlay()
-        print(stereoPlayer)
-        
-        //TODO: split audio channels for independent coeffs from our lib
-        //let channelCount = audioPlayer.numberOfChannels
-        //print("Channel Count: ", channelCount)
         
         //Allow audio to play when app closes
         let audioSession = AVAudioSession.sharedInstance()
@@ -275,8 +227,6 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
                 /// that the app will be used in Portrait mode held in hand and will assume 0 values for
                 /// yaw, pitch, roll upon launch. Rotating the device in portrait mode
                 /// is the expected usage.
-
-                stereoPlayer.setVolume(1.0, fadeDuration: 0.1) // stereoActive: True
 
                 //Send device orientation to m1obj with the preferred algo
                 m1obj.setListenerPosition(point: (cameraPosition)) // 自身の位置

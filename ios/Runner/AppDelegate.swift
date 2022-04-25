@@ -21,6 +21,8 @@ import Flutter
           self.playAudio(result: result, controller: controller, x: args[0].floatValue, y: args[1].floatValue, z: args[2].floatValue)
         case "stopAudio":
           self.stopAudio(result: result, controller: controller)
+        case "getCameraRotation":
+          self.getCameraRotation(result: result, controller: controller)
         default:
           result(FlutterMethodNotImplemented)
           return
@@ -40,5 +42,9 @@ import Flutter
   func stopAudio(result: FlutterResult, controller: FlutterViewController) {
     ViewController().stopAudio()
     result(true)
+  }
+
+  func getCameraRotation(result: FlutterResult, controller: FlutterViewController) {
+    result(ViewController().getCameraRotation())
   }
 }

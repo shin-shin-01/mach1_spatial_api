@@ -79,6 +79,7 @@ func getEuler(q1 : SCNVector4) -> float3
 @available(iOS 14.0, *)
 class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
+    // 音声を再生
     func playAudio(x: Float, y: Float, z: Float) {
         cameraPosition = Mach1Point3D(
             x: x + cameraPositionOffset.x,
@@ -99,6 +100,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         }
     }
     
+    // 音声を停止
     func stopAudio() {
         print("start: ViewController.stopAudio()")
         for audioPlayer in players {
@@ -111,6 +113,11 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             players[i + 0].prepareToPlay()
             players[i + 1].prepareToPlay()
         }
+    }
+
+    // 回転が取得できているか確認のために使用
+    func getCameraRotation() -> Dictionary<String, Float> {
+        return ["yaw": cameraYaw, "pitch": cameraPitch, "roll": cameraRoll]
     }
 
     // 最初に実行される箇所

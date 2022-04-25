@@ -41,9 +41,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('audio');
 
+  // 目的地までの距離
   double x = 0.0;
   double y = 0.0;
   double z = 0.0;
+
+  // 回転角
+  bool bUseHeadphoneOrientationData = false;
+  double yaw = 0.0;
+  double pitch = 0.0;
+  double roll = 0.0;
+
+  // 位置情報
   double latitude = 0.0;
   double longitude = 0.0;
 
@@ -64,6 +73,11 @@ class _MyHomePageState extends State<MyHomePage> {
           await _startAudio();
         }
       });
+
+      Timer.periodic(
+        const Duration(seconds: 2),
+        (_) async => await _getCameraRotation(),
+      );
     });
   }
 
@@ -85,6 +99,21 @@ class _MyHomePageState extends State<MyHomePage> {
   //   }
   // }
 
+  Future<void> _getCameraRotation() async {
+    print("startMethod: _getCameraRotation");
+    try {
+      final rotation = await platform.invokeMethod('getCameraRotation');
+
+      setState(() {
+        yaw = rotation["yaw"] as double;
+        pitch = rotation["pitch"] as double;
+        roll = rotation["roll"] as double;
+      });
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,12 +132,20 @@ class _MyHomePageState extends State<MyHomePage> {
             //   child: const Text('stopAudio'),
             //   onPressed: _stopAudio,
             // ),
+            const SizedBox(height: 50),
+            const Text("XYZ軸方向の距離"),
             Text('x: $x'),
             Text('y: $y'),
             Text('z: $z'),
             const SizedBox(height: 50),
+            const Text("現在の位置情報"),
             Text('Latitude: $latitude'),
             Text('Longitude: $longitude'),
+            const SizedBox(height: 50),
+            const Text("回転情報"),
+            Text('yaw: $yaw'),
+            Text('pitch: $pitch'),
+            Text('roll: $roll'),
           ],
         ),
       ),

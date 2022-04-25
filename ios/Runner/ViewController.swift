@@ -19,7 +19,6 @@ import Mach1SpatialAPI
 private var motionManager = CMMotionManager()
 @available(iOS 14.0, *)
 private var headphoneMotionManager = CMHeadphoneMotionManager()
-private var bUseHeadphoneOrientationData = true // AirPodsの方位データを使用する
 
 var m1obj = Mach1DecodePositional()
 
@@ -122,55 +121,51 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
     // 最初に実行される箇所
     func initialize() {
-        do {
-            Encoder().setup()
-            players = Encoder().setupPlayers()
-            
-            // ===========================
-            // Mach1 Decode Setup
-            // ===========================
-            // Setup the correct angle convention for orientation Euler input angles
-            // オイラー入力角度に正しい角度規則を設定する。
-            m1obj.setPlatformType(type: Mach1PlatformiOS)
-            // Setup the expected spatial audio mix format for decoding
-            // デコード時に想定される空間音声のミックス形式を設定する。
-            m1obj.setDecodeAlgoType(newAlgorithmType: Mach1DecodeAlgoSpatial)
-            // Setup for the safety filter speed:
-            // セーフティーフィルターの回転数の設定
-            //1.0 = no filter | 0.1 = slow filter
-            m1obj.setFilterSpeed(filterSpeed: 0.95)
+        Encoder().setup()
+        players = Encoder().setupPlayers()
+        
+        // ===========================
+        // Mach1 Decode Setup
+        // ===========================
+        // Setup the correct angle convention for orientation Euler input angles
+        // オイラー入力角度に正しい角度規則を設定する。
+        m1obj.setPlatformType(type: Mach1PlatformiOS)
+        // Setup the expected spatial audio mix format for decoding
+        // デコード時に想定される空間音声のミックス形式を設定する。
+        m1obj.setDecodeAlgoType(newAlgorithmType: Mach1DecodeAlgoSpatial)
+        // Setup for the safety filter speed:
+        // セーフティーフィルターの回転数の設定
+        //1.0 = no filter | 0.1 = slow filter
+        m1obj.setFilterSpeed(filterSpeed: 0.95)
 
-            // ===========================
-            // Mach1 Decode Positional Setup
-            // ===========================
-            // Advanced Setting: used for blending 2 m1obj for crafting room ambiences
-            // 高度な設定：2つのm1objをブレンドしてルームアンビエンスを作成する際に使用します。
-            m1obj.setUseBlendMode(useBlendMode: false)
-            // Advanced Setting: ignore movements on height plane
-            // 高度な設定：高さ方向の動きを無視します。-> false
-            m1obj.setIgnoreTopBottom(ignoreTopBottom: false)
-            // Setting: mute audio when setListenerPosition position is outside of m1obj volume
-            // based on setDecoderAlgoPosition & setDecoderAlgoScale
-            // 設定：setListenerPositionの位置がm1objのボリュームの外にある場合、音声をミュートする。
-            // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています
-            m1obj.setMuteWhenOutsideObject(muteWhenOutsideObject: false)
-            // Setting: mute audio when setListenerPosition position is inside of m1obj volume
-            // based on setDecoderAlgoPosition & setDecoderAlgoScale
-            // 設定：setListenerPositionの位置がm1objのボリュームの内側にあるとき、音声をミュートする。
-            // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています。
-            m1obj.setMuteWhenInsideObject(muteWhenInsideObject: true)
-            // Setting: turn on/off distance attenuation of m1obj
-            // 設定：m1objの距離減衰のON/OFF。
-            m1obj.setUseAttenuation(useAttenuation: true)
-            // Advanced Setting: when on, positional rotation is calculated from the closest point
-            // of the m1obj's volume and not rotation from the center of m1obj.
-            // use this if you want the positional rotation tracking to be from a plane instead of from a point
-            // 詳細設定：オンにすると、位置の回転は、m1objの中心からの回転ではなく、
-            // m1objのボリュームの最も近い点から計算されます。
-            m1obj.setUsePlaneCalculation(bool: false)
-        } catch {
-            print (error)
-        }
+        // ===========================
+        // Mach1 Decode Positional Setup
+        // ===========================
+        // Advanced Setting: used for blending 2 m1obj for crafting room ambiences
+        // 高度な設定：2つのm1objをブレンドしてルームアンビエンスを作成する際に使用します。
+        m1obj.setUseBlendMode(useBlendMode: false)
+        // Advanced Setting: ignore movements on height plane
+        // 高度な設定：高さ方向の動きを無視します。-> false
+        m1obj.setIgnoreTopBottom(ignoreTopBottom: false)
+        // Setting: mute audio when setListenerPosition position is outside of m1obj volume
+        // based on setDecoderAlgoPosition & setDecoderAlgoScale
+        // 設定：setListenerPositionの位置がm1objのボリュームの外にある場合、音声をミュートする。
+        // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています
+        m1obj.setMuteWhenOutsideObject(muteWhenOutsideObject: false)
+        // Setting: mute audio when setListenerPosition position is inside of m1obj volume
+        // based on setDecoderAlgoPosition & setDecoderAlgoScale
+        // 設定：setListenerPositionの位置がm1objのボリュームの内側にあるとき、音声をミュートする。
+        // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています。
+        m1obj.setMuteWhenInsideObject(muteWhenInsideObject: true)
+        // Setting: turn on/off distance attenuation of m1obj
+        // 設定：m1objの距離減衰のON/OFF。
+        m1obj.setUseAttenuation(useAttenuation: true)
+        // Advanced Setting: when on, positional rotation is calculated from the closest point
+        // of the m1obj's volume and not rotation from the center of m1obj.
+        // use this if you want the positional rotation tracking to be from a plane instead of from a point
+        // 詳細設定：オンにすると、位置の回転は、m1objの中心からの回転ではなく、
+        // m1objのボリュームの最も近い点から計算されます。
+        m1obj.setUsePlaneCalculation(bool: false)
         
         //Allow audio to play when app closes
         let audioSession = AVAudioSession.sharedInstance()
@@ -195,30 +190,16 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             /// Start native IMU core motion manager thread
             /// ヘッドホンから情報が取得できるならそれを利用し, そうでない場合にデバイスの情報を取得する
             motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: queue, withHandler: { [weak self] (motion, error) -> Void in
-                if (bUseHeadphoneOrientationData && headphoneMotionManager.isDeviceMotionAvailable){
+                if (headphoneMotionManager.isDeviceMotionAvailable){
                     headphoneMotionManager.startDeviceMotionUpdates(to: queue, withHandler: { [weak self] (headphonemotion, error) -> Void in
-                        // Get the attitudes of the device
                         let quat = headphonemotion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
-
                         let angles = getEuler(q1: quat!)
                         cameraYaw = angles.x
                         cameraPitch = angles.y
                         cameraRoll = angles.z
-
-                        // TODO: ここがちゃんと反映されているか確認する
-                        print("======================")
-                        print(cameraYaw)
-                        print(cameraPitch)
-                        print(cameraRoll)
-
                     })
-                    if (!headphoneMotionManager.isDeviceMotionActive) {
-                        bUseHeadphoneOrientationData = false // AirPodsからデータが更新されていなかったら, false
-                    }
                 } else {
-                    // Get the attitudes of the device
                     let quat = motion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
-
                     let angles = getEuler(q1: quat!)
                     cameraYaw = angles.x
                     cameraPitch = angles.y

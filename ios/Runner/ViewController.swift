@@ -42,14 +42,14 @@ func clampFloat(value : Float, min : Float, max : Float) -> Float {
     return min > value ? min : max < value ? max : value
 }
 
-func getEuler(q1 : SCNVector4) -> float3
+func getEuler(q1 : SCNVector4) -> SIMD3<Float>
 {
-    var res = float3(0,0,0)
+    var res = SIMD3<Float>(0,0,0)
     
     let test = q1.x * q1.y + q1.z * q1.w
     if (test > 0.499) // singularity at north pole
     {
-        return float3(
+        return SIMD3<Float>(
         0,
         Float(2 * atan2(q1.x, q1.w)),
         .pi / 2
@@ -57,7 +57,7 @@ func getEuler(q1 : SCNVector4) -> float3
     }
     if (test < -0.499) // singularity at south pole
     {
-        return float3(
+        return SIMD3<Float>(
         0,
         Float(-2 * atan2(q1.x, q1.w)),
         -.pi / 2
@@ -120,9 +120,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     }
 
     // 最初に実行される箇所
-    func initialize() {
+    func initialize(audioFilePath: String) {
         Encoder().setup()
-        players = Encoder().setupPlayers()
+        players = Encoder().setupPlayers(audioFilePath: audioFilePath)
         
         // ===========================
         // Mach1 Decode Setup
@@ -232,8 +232,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 100, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 100) // 100メートル？
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 1000, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 1000) // 100メートル？
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
 
                 var decodeArray: [Float] = Array(repeating: 0.0, count: 18)

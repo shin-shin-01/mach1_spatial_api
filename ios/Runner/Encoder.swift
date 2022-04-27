@@ -12,60 +12,34 @@ import AVFoundation
 import SceneKit
 import Mach1SpatialAPI
 
-var soundFiles: [String]  = [
-    "kotobuki_city",
-]
+// var soundFileURL: String = "https://firebasestorage.googleapis.com/v0/b/onp-dev-4447a.appspot.com/o/kotobuki_city.wav?alt=media&token=898b41f6-9e05-442e-85da-d4f5563ea799";
 
 
 class Encoder: UIView {
-    
     var volume : Float = 1.0
     var height : Float = 0.0
-    var soundIndex : Int = 0
     var selected : Bool = false
     
-    var players: [AVAudioPlayer] = []
+    var players: [AVAudioPlayer] = [AVAudioPlayer(), AVAudioPlayer()]
     var m1Encode : Mach1Encode!
     
     var xInternal : Float = 0.0
     var yInternal : Float = 0.0
     var stereoSpread : Float = 0.0
-    var type : Mach1EncodeInputModeType = Mach1EncodeInputModeMono
- 
-    let circleInternalLayer = CAShapeLayer()
-    let circleExternalLayer = CAShapeLayer()
-
-    let circleLeftLayer = CAShapeLayer()
-    let circleRightLayer = CAShapeLayer()
-
-    // required init(coder aDecoder: NSCoder) {
-    //     super.init(coder: aDecoder)!
-        
-    //     setup()
-    //     setupPlayers()
-    // }
-    
-    // override init(frame: CGRect) {
-    //     super.init(frame: frame)
-        
-    //     setup()
-    //     setupPlayers()
-    // }
     
     func setup() {
         m1Encode = Mach1Encode()
     }
     
-    func setupPlayers() -> [AVAudioPlayer] {
+    func setupPlayers(audioFilePath: String) -> [AVAudioPlayer] {
       
         for i in 0..<players.count {
             players[i].stop()
         }
 
-        type = Mach1EncodeInputModeMono
         players = [AVAudioPlayer(), AVAudioPlayer()]
-        try! players[0] = AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: soundFiles[soundIndex], ofType: "wav")!))
-        try! players[1] = AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: Bundle.main.path(forResource: soundFiles[soundIndex], ofType: "wav")!))
+        try! players[0] = AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: audioFilePath))
+        try! players[1] = AVAudioPlayer(contentsOf: URL.init(fileURLWithPath: audioFilePath))
         
         for i in stride(from: 0, to: players.count, by: 2) {
             players[i + 0].pan = -1.0
@@ -84,9 +58,6 @@ class Encoder: UIView {
             players[i + 1].isMeteringEnabled = true
         }
 
-        circleLeftLayer	.isHidden = (type == Mach1EncodeInputModeMono)
-        circleRightLayer.isHidden = (type == Mach1EncodeInputModeMono)
-        
         return players;
    }
     

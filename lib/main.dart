@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 
     Future(() async {
+      await _initializeAudio();
       await checkPermission();
 
       Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -81,6 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // 音声ファイルを用いてAudioを初期化
+  Future<void> _initializeAudio() async {
+    print("startMethod: _initializeAudio");
+    try {
+      await platform.invokeMethod('initialize', "filepath");
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
+  // 音声を再生
   Future<void> _startAudio() async {
     print("startMethod: _startAudio");
     try {

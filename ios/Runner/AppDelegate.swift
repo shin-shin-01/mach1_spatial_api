@@ -10,12 +10,12 @@ import Flutter
     let controller :FlutterViewController = window?.rootViewController as! FlutterViewController
     let audioChannel = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
 
-    // ViewControllerを初期化
-    ViewController().initialize()
-
     audioChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         switch call.method {
+        case "initialize":
+          let arg = call.arguments as! String;
+          self.initialize(result: result, controller: controller, audioFilePath: arg)
         case "playAudio":
           let args = call.arguments as! Array<NSNumber>;
           self.playAudio(result: result, controller: controller, x: args[0].floatValue, y: args[1].floatValue, z: args[2].floatValue)
@@ -31,6 +31,11 @@ import Flutter
 
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func initialize(result: FlutterResult, controller: FlutterViewController, audioFilePath: String) {
+    ViewController().initialize(audioFilePath: audioFilePath)
+    result(true)
   }
 
  func playAudio(result: FlutterResult, controller: FlutterViewController, x: Float, y: Float, z: Float) {

@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 
-void main() {
+import 'download_service.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await DownloadService.initialize();
+
   // 向き指定
   // it is expected that the app will be used in Portrait mode held in hand and will assume 0 values for...
   SystemChrome.setPreferredOrientations([
@@ -82,11 +86,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // ファイルをダウンロードして path を返す
+  Future<String> _downloadFile() async {
+    print("startMethod: _downloadFile");
+    final downloadFile = DownloadService();
+    await downloadFile.prepareSaveDir();
+    await downloadFile.downloadFile();
+    return downloadFile.getLocalFilePath();
+  }
+
   // 音声ファイルを用いてAudioを初期化
   Future<void> _initializeAudio() async {
     print("startMethod: _initializeAudio");
+    final String audioFilePath = await _downloadFile();
     try {
-      await platform.invokeMethod('initialize', "filepath");
+      await platform.invokeMethod('initialize', audioFilePath);
     } on PlatformException catch (e) {
       print(e);
     }

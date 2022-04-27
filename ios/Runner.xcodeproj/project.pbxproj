@@ -21,6 +21,7 @@
 		6C34174C280AC93C0083B77E /* 005.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C341743280AC93C0083B77E /* 005.aif */; };
 		6C34174D280AC93C0083B77E /* stereo.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6C341744280AC93C0083B77E /* stereo.wav */; };
 		6C341751280BCD9C0083B77E /* CMDeviceMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */; };
+		6CD0DF3B2818CE9F0078B1FA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CD0DF3A2818CE8A0078B1FA /* libsqlite3.tbd */; };
 		6CD1E53F2813D00C000039B1 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD1E53E2813D00C000039B1 /* Encoder.swift */; };
 		6CD1E5412813D09D000039B1 /* kotobuki_city.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6CD1E5402813D09D000039B1 /* kotobuki_city.wav */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
@@ -58,6 +59,7 @@
 		6C341743280AC93C0083B77E /* 005.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 005.aif; sourceTree = "<group>"; };
 		6C341744280AC93C0083B77E /* stereo.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stereo.wav; sourceTree = "<group>"; };
 		6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CMDeviceMotion.swift; sourceTree = "<group>"; };
+		6CD0DF3A2818CE8A0078B1FA /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		6CD1E53E2813D00C000039B1 /* Encoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
 		6CD1E5402813D09D000039B1 /* kotobuki_city.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = kotobuki_city.wav; sourceTree = "<group>"; };
 		6E0F1E92AEF2DD29A94A20B2 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6CD0DF3B2818CE9F0078B1FA /* libsqlite3.tbd in Frameworks */,
 				3DA99F0DFF79C61CE60F9F7E /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -107,6 +110,7 @@
 		6F74DFE934CD2FD9D553DBCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6CD0DF3A2818CE8A0078B1FA /* libsqlite3.tbd */,
 				ACD8A0D8195D52ADABAC252B /* Pods_Runner.framework */,
 			);
 			name = Frameworks;

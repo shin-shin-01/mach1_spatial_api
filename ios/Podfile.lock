@@ -1,26 +1,38 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_downloader (0.0.1):
+    - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
   - Mach1SpatialAPI (0.1.30)
+  - path_provider_ios (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - Mach1SpatialAPI (from `Pod-Mach1SpatialAPI`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_downloader:
+    :path: ".symlinks/plugins/flutter_downloader/ios"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/ios"
   Mach1SpatialAPI:
     :path: Pod-Mach1SpatialAPI
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  flutter_downloader: 058b9c41564a90500f67f3e432e3524613a7fd83
   geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
   Mach1SpatialAPI: 0bbb415a5993d2d3135551123ba68405fa9eb835
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
 
 PODFILE CHECKSUM: c075a7d2c66ade210a7ec2d17d06d1d82fe7d441
 

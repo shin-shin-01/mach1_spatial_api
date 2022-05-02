@@ -81,9 +81,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     // 音声を再生
     func playAudio(x: Float, y: Float, z: Float) {
         cameraPosition = Mach1Point3D(
-            x: x + cameraPositionOffset.x,
-            y: y + cameraPositionOffset.y,
-            z: z + cameraPositionOffset.z
+            x: 1,
+            y: 1,
+            z: 1
         )
 
         print("start: ViewController.playAudio()")
@@ -91,10 +91,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             let startDelayTime = 1.0
             let now = players[0].deviceCurrentTime
             let startTime = now + startDelayTime
-            for audioPlayer in players {
-                audioPlayer.play(atTime: startTime)
-            }
-            print("isPlaying")
+                
+            players[0].play(atTime: startTime)
+            players[1].play(atTime: startTime)
             isPlaying = true
         }
     }
@@ -102,16 +101,12 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     // 音声を停止
     func stopAudio() {
         print("start: ViewController.stopAudio()")
-        for audioPlayer in players {
-            audioPlayer.stop()
-        }
-        
+        players[0].stop()
+        players[1].stop()
         isPlaying = false
-        // prep files for next play
-        for i in stride(from: 0, to: players.count, by: 2) {
-            players[i + 0].prepareToPlay()
-            players[i + 1].prepareToPlay()
-        }
+
+        players[0].prepareToPlay()
+        players[1].prepareToPlay()
     }
 
     // 回転が取得できているか確認のために使用
@@ -121,50 +116,37 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
     // 最初に実行される箇所
     func initialize(audioFilePath: String) {
-        Encoder().setup()
         players = Encoder().setupPlayers(audioFilePath: audioFilePath)
         
         // ===========================
         // Mach1 Decode Setup
         // ===========================
         // Setup the correct angle convention for orientation Euler input angles
-        // オイラー入力角度に正しい角度規則を設定する。
         m1obj.setPlatformType(type: Mach1PlatformiOS)
         // Setup the expected spatial audio mix format for decoding
-        // デコード時に想定される空間音声のミックス形式を設定する。
         m1obj.setDecodeAlgoType(newAlgorithmType: Mach1DecodeAlgoSpatial)
         // Setup for the safety filter speed:
-        // セーフティーフィルターの回転数の設定
-        //1.0 = no filter | 0.1 = slow filter
         m1obj.setFilterSpeed(filterSpeed: 0.95)
 
         // ===========================
         // Mach1 Decode Positional Setup
         // ===========================
         // Advanced Setting: used for blending 2 m1obj for crafting room ambiences
-        // 高度な設定：2つのm1objをブレンドしてルームアンビエンスを作成する際に使用します。
         m1obj.setUseBlendMode(useBlendMode: false)
         // Advanced Setting: ignore movements on height plane
-        // 高度な設定：高さ方向の動きを無視します。-> false
         m1obj.setIgnoreTopBottom(ignoreTopBottom: false)
         // Setting: mute audio when setListenerPosition position is outside of m1obj volume
         // based on setDecoderAlgoPosition & setDecoderAlgoScale
-        // 設定：setListenerPositionの位置がm1objのボリュームの外にある場合、音声をミュートする。
-        // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています
         m1obj.setMuteWhenOutsideObject(muteWhenOutsideObject: false)
         // Setting: mute audio when setListenerPosition position is inside of m1obj volume
         // based on setDecoderAlgoPosition & setDecoderAlgoScale
-        // 設定：setListenerPositionの位置がm1objのボリュームの内側にあるとき、音声をミュートする。
-        // setDecoderAlgoPosition と setDecoderAlgoScale に基づいています。
-        m1obj.setMuteWhenInsideObject(muteWhenInsideObject: true)
+        m1obj.setMuteWhenInsideObject(muteWhenInsideObject: false)
         // Setting: turn on/off distance attenuation of m1obj
-        // 設定：m1objの距離減衰のON/OFF。
         m1obj.setUseAttenuation(useAttenuation: true)
         // Advanced Setting: when on, positional rotation is calculated from the closest point
         // of the m1obj's volume and not rotation from the center of m1obj.
         // use this if you want the positional rotation tracking to be from a plane instead of from a point
-        // 詳細設定：オンにすると、位置の回転は、m1objの中心からの回転ではなく、
-        // m1objのボリュームの最も近い点から計算されます。
+        // - 回転の中心は, 面ではなく点で行いたいため, false
         m1obj.setUsePlaneCalculation(bool: false)
         
         //Allow audio to play when app closes
@@ -232,18 +214,20 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 1000, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 1000) // 100メートル？
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 3, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 3)
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
 
+                // Remark: Result is returned back as the argument, an array of 18 floats is required as an input
                 var decodeArray: [Float] = Array(repeating: 0.0, count: 18)
                 m1obj.getCoefficients(result: &decodeArray)
 
                 //Use each coeff to decode multichannel Mach1 Spatial mix
-                for i in stride(from: 0, to: players.count, by: 2) {
-                    players[i * 2].setVolume(Float(decodeArray[i * 2]), fadeDuration: 0)
-                    players[i * 2 + 1].setVolume(Float(decodeArray[i * 2 + 1]), fadeDuration: 0)
-                }
+                print("==================================")
+                print(Float(decodeArray[0]))
+                print(Float(decodeArray[1]))
+                players[0].setVolume(Float(decodeArray[0]), fadeDuration: 0)
+                players[1].setVolume(Float(decodeArray[1]), fadeDuration: 0)
             })
             print("Device motion started")
         } else {

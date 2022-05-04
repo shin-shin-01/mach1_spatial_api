@@ -46,8 +46,9 @@ class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('audio');
 
   // 目的地までの距離
+  double distance = 0.0;
   double x = 0.0;
-  double y = 0.0;
+  double y = 0.0; // 縦方向
   double z = 0.0;
 
   // 回転角
@@ -159,6 +160,9 @@ class _MyHomePageState extends State<MyHomePage> {
             //   onPressed: _stopAudio,
             // ),
             const SizedBox(height: 50),
+            const Text("目的地までの距離"),
+            Text('$distanceメートル'),
+            const SizedBox(height: 20),
             const Text("XYZ軸方向の距離"),
             Text('x: $x'),
             Text('y: $y'),
@@ -204,13 +208,18 @@ class _MyHomePageState extends State<MyHomePage> {
     double xDistanceInMeters = Geolocator.distanceBetween(
         latitude, longitude, objectLatitude, longitude); // x軸方向の距離を計算
     double yDistanceInMeters = Geolocator.distanceBetween(
-        latitude, longitude, latitude, objectLongitude); // y軸方向の距離を計算
+        latitude, longitude, latitude, objectLongitude); // z軸方向の距離を計算
+    double distanceInMeters = Geolocator.distanceBetween(
+        latitude, longitude, objectLatitude, objectLongitude); // 直線距離を計算
 
     setState(() {
+      distance = double.parse((distanceInMeters).toStringAsFixed(2));
+
       x = position.latitude < objectLatitude
           ? xDistanceInMeters
           : -xDistanceInMeters;
-      y = position.longitude < objectLongitude
+      y = 0.0;
+      z = position.longitude < objectLongitude
           ? yDistanceInMeters
           : -yDistanceInMeters;
     });

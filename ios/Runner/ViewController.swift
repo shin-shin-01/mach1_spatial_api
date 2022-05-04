@@ -81,9 +81,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     // 音声を再生
     func playAudio(x: Float, y: Float, z: Float) {
         cameraPosition = Mach1Point3D(
-            x: 1,
-            y: 1,
-            z: 1
+            x: x,
+            y: y,
+            z: z
         )
 
         print("start: ViewController.playAudio()")
@@ -217,8 +217,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 3, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 3)
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 20, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 20)
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
 
                 // Remark: Result is returned back as the argument, an array of 18 floats is required as an input

@@ -5,12 +5,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-
 import 'download_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DownloadService.initialize();
 
   // 向き指定
   // it is expected that the app will be used in Portrait mode held in hand and will assume 0 values for...
@@ -97,9 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<String> _downloadFile() async {
     print("startMethod: _downloadFile");
     final downloadFile = DownloadService();
-    await downloadFile.prepareSaveDir();
-    await downloadFile.downloadFile();
-    return downloadFile.getLocalFilePath();
+    return await downloadFile.downloadFile();
   }
 
   // 音声ファイルを用いてAudioを初期化

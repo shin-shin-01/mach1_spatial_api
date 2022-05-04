@@ -252,8 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
       x = position.latitude < objectLatitude
           ? xDistanceInMeters
           : -xDistanceInMeters;
-      y = 0.0;
-      z = position.longitude < objectLongitude
+      y = position.longitude < objectLongitude
           ? yDistanceInMeters
           : -yDistanceInMeters;
     });

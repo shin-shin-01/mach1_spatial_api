@@ -208,7 +208,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 //Send device orientation to m1obj with the preferred algo
                 m1obj.setListenerPosition(point: (cameraPosition))
-                m1obj.setListenerRotation(point: Mach1Point3D(x: cameraYaw, y: cameraPitch, z: cameraRoll))
+                // MODIFIED: XYZをわかりやすい方向に置き換えて,回転についても一番しっくりくる位置に置き換えた。
+                m1obj.setListenerRotation(point: Mach1Point3D(x: cameraPitch, y: cameraRoll, z: cameraYaw))
                 m1obj.setDecoderAlgoPosition(point: (objectPosition))
                 m1obj.setDecoderAlgoRotation(point: Mach1Point3D(x: 0, y: 0, z: 0))
                 m1obj.setDecoderAlgoScale(point: Mach1Point3D(x: 0.1, y: 0.1, z: 0.1))
@@ -219,8 +220,8 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 2000, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 2000)
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 30, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 30)
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
 
                 // Remark: Result is returned back as the argument, an array of 18 floats is required as an input

@@ -33,6 +33,8 @@ var cameraRoll : Float = 0
 
 var objectPosition: Mach1Point3D = Mach1Point3D(x: 0, y: 0, z: 0)
 
+var leftVolume : Float = 0
+var rightVolume : Float = 0
 
 func mapFloat(value : Float, inMin : Float, inMax : Float, outMin : Float, outMax : Float) -> Float {
     return (value - inMin) / (inMax - inMin) * (outMax - outMin) + outMin
@@ -109,9 +111,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         players[1].prepareToPlay()
     }
 
-    // 回転が取得できているか確認のために使用
-    func getCameraRotation() -> Dictionary<String, Float> {
-        return ["yaw": cameraYaw, "pitch": cameraPitch, "roll": cameraRoll]
+    // 現状の値の確認のために使用（角度, 音量）
+    func getCurrentValue() -> Dictionary<String, Float> {
+        return ["yaw": cameraYaw, "pitch": cameraPitch, "roll": cameraRoll, "leftVolume": leftVolume, "rightVolume": rightVolume]
     }
 
     // 最初に実行される箇所
@@ -217,17 +219,20 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
 
                 // compute attenuation linear curve - project dist [0:1] to [1:0] interval
                 var attenuation : Float = m1obj.getDist()
-                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 20, outMin: 1, outMax: 0)
-                attenuation = clampFloat(value: attenuation, min: 0, max: 20)
+                attenuation = mapFloat(value: attenuation, inMin: 0, inMax: 2000, outMin: 1, outMax: 0)
+                attenuation = clampFloat(value: attenuation, min: 0, max: 2000)
                 m1obj.setAttenuationCurve(attenuationCurve: attenuation)
 
                 // Remark: Result is returned back as the argument, an array of 18 floats is required as an input
                 var decodeArray: [Float] = Array(repeating: 0.0, count: 18)
                 m1obj.getCoefficients(result: &decodeArray)
 
+                leftVolume = Float(decodeArray[0])
+                rightVolume = Float(decodeArray[1])
+
                 //Use each coeff to decode multichannel Mach1 Spatial mix
-                players[0].setVolume(Float(decodeArray[0]), fadeDuration: 0)
-                players[1].setVolume(Float(decodeArray[1]), fadeDuration: 0)
+                players[0].setVolume(leftVolume, fadeDuration: 0)
+                players[1].setVolume(rightVolume, fadeDuration: 0)
             })
             print("Device motion started")
         } else {

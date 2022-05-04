@@ -21,6 +21,7 @@ class DownloadService {
     FlutterDownloader.registerCallback(downloadCallback);
   }
 
+  // TODO: ここで正しく終了させる必要あるかも
   static void downloadCallback(
       String id, DownloadTaskStatus status, int progress) {
     final SendPort send =

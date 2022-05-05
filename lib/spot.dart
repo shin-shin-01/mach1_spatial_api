@@ -13,6 +13,14 @@ class Spot {
 
   Spot(this.name, this.latitude, this.longitude, this.audio);
 
+  static Spot fromJson(dynamic json, Map<String, Audio> audioMap) {
+    final name = json["name"] as String;
+    final latitude = json["latitude"] as double;
+    final longitude = json["longitude"] as double;
+    final audio = audioMap[json["audioId"] as String]!;
+    return Spot(name, latitude, longitude, audio);
+  }
+
   // 直線距離を計算
   void setDistance(Position position) {
     double currentLatitude = position.latitude;

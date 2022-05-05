@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'audio.dart';
 import 'download_service.dart';
+import 'firebase_service.dart';
 import 'spot.dart';
 
 class AudioService {
@@ -13,13 +14,14 @@ class AudioService {
   // ========================
   // firebase から音源を設定
   // ========================
-  AudioService(dynamic test, this.platform) {
+  Future<void> initialize(MethodChannel platform) async {
     // 音源を全て取得
-    Map<String, Audio> audioMap = {};
+    await FirebaseService.setAudios();
     // 場所を全て設定
-    spotList = [Spot("demo.wav", 1, 1, audioMap["a"]!)];
-
+    spotList = await FirebaseService.getSpots();
     currentSpot = spotList[0];
+    // MethodChannelを設定
+    this.platform = platform;
   }
 
   // ========================

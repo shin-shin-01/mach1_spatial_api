@@ -2,23 +2,25 @@
 
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'spot.dart';
+
 import 'audio_service.dart';
+import 'spot.dart';
 
 // ========================
 // main
 // ========================
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // 向き指定
   // it is expected that the app will be used in Portrait mode held in hand and will assume 0 values for...
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -77,10 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 
     Future(() async {
+      // 位置情報の許可を得る
       await checkPermission();
-      // TODO firebase からデータ取得
-      final AudioService audioService = AudioService("", platform);
+      // AudioServiceを初期化
+      final AudioService audioService = AudioService();
+      await audioService.initialize(platform);
 
+      // 位置情報を定期的に取得・反映
       Geolocator.getPositionStream(locationSettings: locationSettings)
           .listen((Position? position) async {
         if (position != null) {
@@ -99,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       });
 
+      // 2秒ごとに現在の情報を取得（回転情報や音量情報）
       Timer.periodic(
         const Duration(seconds: 2),
         (_) async => await _getCurrentValue(),

@@ -5,12 +5,8 @@ import 'package:path_provider/path_provider.dart';
 
 // ダウンロードする機能
 class DownloadService {
-  String fileName = "demo.wav";
-  String url =
-      "https://firebasestorage.googleapis.com/v0/b/onp-dev-4447a.appspot.com/o/tobari_city.wav?alt=media&token=2aa3186a-3fc0-49ba-8c9d-15fba11dd402";
-
   // ファイルをダウンロードする
-  Future<String> downloadFile() async {
+  static Future<String> downloadFile(String fileName, String url) async {
     Dio dio = Dio();
 
     var dir = await getApplicationDocumentsDirectory();

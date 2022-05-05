@@ -5,8 +5,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'download_service.dart';
+import 'spot.dart';
+import 'audio_service.dart';
 
+// ========================
+// main
+// ========================
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -65,21 +69,32 @@ class _MyHomePageState extends State<MyHomePage> {
   double leftVolume = 0.0;
   double rightVolume = 0.0;
 
-  final LocationSettings locationSettings =
-      const LocationSettings(accuracy: LocationAccuracy.best);
-
+  // ========================
+  // 初期化
+  // ========================
   @override
   void initState() {
     super.initState();
 
     Future(() async {
-      await _initializeAudio();
       await checkPermission();
+      // TODO firebase からデータ取得
+      final AudioService audioService = AudioService("", platform);
 
       Geolocator.getPositionStream(locationSettings: locationSettings)
           .listen((Position? position) async {
         if (position != null) {
-          await setDistanceFromPosition(position);
+          // 最も近い場所を選ぶ
+          Spot spot = await audioService.setNearestSpot(position);
+
+          setState(() {
+            latitude = position.latitude;
+            longitude = position.longitude;
+            distance = double.parse((spot.distance).toStringAsFixed(2));
+            x = spot.xDistance;
+            y = spot.yDistance;
+          });
+
           await _startAudio();
         }
       });
@@ -91,25 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // ファイルをダウンロードして path を返す
-  Future<String> _downloadFile() async {
-    print("startMethod: _downloadFile");
-    final downloadFile = DownloadService();
-    return await downloadFile.downloadFile();
-  }
-
-  // 音声ファイルを用いてAudioを初期化
-  Future<void> _initializeAudio() async {
-    print("startMethod: _initializeAudio");
-    final String audioFilePath = await _downloadFile();
-    try {
-      await platform.invokeMethod('initialize', audioFilePath);
-    } on PlatformException catch (e) {
-      print(e);
-    }
-  }
-
+  // ========================
   // 音声を再生
+  // ========================
   Future<void> _startAudio() async {
     print("startMethod: _startAudio");
     try {
@@ -119,6 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // ========================
+  // 音量や回転情報を取得
+  // ========================
   Future<void> _getCurrentValue() async {
     print("startMethod: _getCurrentValue");
     try {
@@ -136,6 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // ========================
+  // UI
+  // ========================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,46 +216,23 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
   }
+}
 
-  // 位置情報の許可を得る
-  Future<void> checkPermission() async {
-    LocationPermission permission;
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        return Future.error('Location Not Available');
-      }
+// ========================
+// Geolocator
+// ========================
+// 位置情報の設定
+const LocationSettings locationSettings =
+    LocationSettings(accuracy: LocationAccuracy.best);
+
+// 位置情報の許可を得る
+Future<void> checkPermission() async {
+  LocationPermission permission;
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location Not Available');
     }
-  }
-
-  // 位置情報から対象オブジェクトへの距離を x, y で出力
-  Future<void> setDistanceFromPosition(Position position) async {
-    // 大濠公園入口
-    double objectLatitude = 33.59012176;
-    double objectLongitude = 130.37748086;
-
-    setState(() {
-      latitude = position.latitude;
-      longitude = position.longitude;
-    });
-
-    double xDistanceInMeters = Geolocator.distanceBetween(
-        latitude, longitude, objectLatitude, longitude); // x軸方向の距離を計算
-    double yDistanceInMeters = Geolocator.distanceBetween(
-        latitude, longitude, latitude, objectLongitude); // z軸方向の距離を計算
-    double distanceInMeters = Geolocator.distanceBetween(
-        latitude, longitude, objectLatitude, objectLongitude); // 直線距離を計算
-
-    setState(() {
-      distance = double.parse((distanceInMeters).toStringAsFixed(2));
-
-      x = position.latitude < objectLatitude
-          ? xDistanceInMeters
-          : -xDistanceInMeters;
-      y = position.longitude < objectLongitude
-          ? yDistanceInMeters
-          : -yDistanceInMeters;
-    });
   }
 }

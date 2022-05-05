@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>974340770200-5vl9bfh6nonrfih1etnr29vbobcbk0bk.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.974340770200-5vl9bfh6nonrfih1etnr29vbobcbk0bk</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD_KmP8xvGOpWLiTDyHjM5UdXsWBbtpso0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>974340770200</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.mach1SpatialApi</string>
+	<key>PROJECT_ID</key>
+	<string>naxa-demo-81aac</string>
+	<key>STORAGE_BUCKET</key>
+	<string>naxa-demo-81aac.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:974340770200:ios:59d49067d0d7eb44a143ed</string>
+</dict>
+</plist>

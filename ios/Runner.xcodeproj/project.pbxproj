@@ -10,6 +10,7 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		3DA99F0DFF79C61CE60F9F7E /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACD8A0D8195D52ADABAC252B /* Pods_Runner.framework */; };
+		6C24965128239BD0008FD881 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6C24965028239BD0008FD881 /* GoogleService-Info.plist */; };
 		6C34170B280AB0AA0083B77E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C34170A280AB0AA0083B77E /* ViewController.swift */; };
 		6C341745280AC93C0083B77E /* 001.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C34173C280AC93C0083B77E /* 001.aif */; };
 		6C341746280AC93C0083B77E /* 000.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C34173D280AC93C0083B77E /* 000.aif */; };
@@ -48,6 +49,7 @@
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		6C24965028239BD0008FD881 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6C34170A280AB0AA0083B77E /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		6C34173C280AC93C0083B77E /* 001.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 001.aif; sourceTree = "<group>"; };
 		6C34173D280AC93C0083B77E /* 000.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 000.aif; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
+				6C24965028239BD0008FD881 /* GoogleService-Info.plist */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
@@ -240,6 +243,7 @@
 			files = (
 				6CD1E5412813D09D000039B1 /* kotobuki_city.wav in Resources */,
 				6C341748280AC93C0083B77E /* 003.aif in Resources */,
+				6C24965128239BD0008FD881 /* GoogleService-Info.plist in Resources */,
 				6C341745280AC93C0083B77E /* 001.aif in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				6C34174D280AC93C0083B77E /* stereo.wav in Resources */,

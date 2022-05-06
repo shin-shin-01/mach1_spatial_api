@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'snackbar_service.dart';
+
 // ダウンロードする機能
 class DownloadService {
   // ファイルをダウンロードする
@@ -20,6 +22,7 @@ class DownloadService {
     // ファイルが存在しない場合のみダウンロード
     bool alreadyExists = await File(filePath).exists();
     if (!alreadyExists) {
+      SnackbarService.showShackBar("$fileNameをダウンロードします");
       await dio.download(url, filePath);
     }
 

@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'audio.dart';
 import 'download_service.dart';
 import 'firebase_service.dart';
+import 'snackbar_service.dart';
 import 'spot.dart';
 
 class AudioService {
@@ -41,6 +42,10 @@ class AudioService {
       if (currentSpot.distance > spot.distance) {
         currentSpot = spot;
       }
+    }
+
+    if (oldSpot.id != currentSpot.id) {
+      SnackbarService.showShackBar("${currentSpot.name}を目的地に変更します");
     }
 
     if (oldSpot.audio.id != currentSpot.audio.id) {

@@ -107,8 +107,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         players[1].stop()
         isPlaying = false
 
-        players[0].prepareToPlay()
-        players[1].prepareToPlay()
+        // iPhone, AirPodsの向き取得の停止
+        motionManager.stopDeviceMotionUpdates()
+        headphoneMotionManager.stopDeviceMotionUpdates()
     }
 
     // 現状の値の確認のために使用（角度, 音量）

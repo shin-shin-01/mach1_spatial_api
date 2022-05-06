@@ -51,8 +51,11 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   static const platform = MethodChannel('audio');
+  StreamSubscription? _getPositionSubscription;
+  Timer? _getCurrentValueTimer;
+  bool _isFinished = false;
 
   // 目的地
   String spotName = "";
@@ -84,54 +87,110 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+    _startJobs();
+  }
 
-    Future(() async {
-      // 位置情報の許可を得る
-      await checkPermission();
-      // AudioServiceを初期化
-      final AudioService audioService = AudioService();
-      await audioService.initialize(platform);
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
 
-      // 位置情報を定期的に取得・反映
-      // TODO: background移行時に終了するようにする
-      // TODO: stopAudioも実装する。
-      Geolocator.getPositionStream(locationSettings: locationSettings)
-          .listen((Position? position) async {
-        if (position != null) {
-          // 最も近い場所を選ぶ
-          Spot spot = await audioService.setNearestSpot(position);
-
-          setState(() {
-            latitude = position.latitude;
-            longitude = position.longitude;
-
-            spotName = spot.name;
-            audioName = spot.audio.name;
-            distance = double.parse((spot.distance).toStringAsFixed(2));
-            x = spot.xDistance;
-            y = spot.yDistance;
-          });
-
-          // 音楽を再生
-          await _startAudio();
-        }
-      });
-
-      // 2秒ごとに現在の情報を取得（回転情報や音量情報）
-      Timer.periodic(
-        const Duration(seconds: 2),
-        (_) async => await _getCurrentValue(),
-      );
-    });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        if (_isFinished) _startJobs();
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        _finishJobs();
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        _finishJobs();
+        break;
+    }
   }
 
   // ========================
-  // 音声を再生
+  // ジョブを定期実行
+  // ========================
+  void _startJobs() async {
+    _isFinished = false;
+
+    // 位置情報の許可を得る
+    await checkPermission();
+    // AudioServiceを初期化
+    final AudioService audioService = AudioService();
+    await audioService.initialize(platform);
+
+    // 位置情報を定期的に取得・反映
+    _getPositionSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position? position) async {
+      if (position != null) {
+        // 最も近い場所を選ぶ
+        Spot spot = await audioService.setNearestSpot(position);
+
+        setState(() {
+          latitude = position.latitude;
+          longitude = position.longitude;
+
+          spotName = spot.name;
+          audioName = spot.audio.name;
+          distance = double.parse((spot.distance).toStringAsFixed(2));
+          x = spot.xDistance;
+          y = spot.yDistance;
+        });
+
+        // 音楽を再生
+        await _startAudio();
+      }
+    });
+
+    // 2秒ごとに現在の情報を取得（回転情報や音量情報）
+    _getCurrentValueTimer = Timer.periodic(
+      const Duration(seconds: 2),
+      (_) async => await _getCurrentValue(),
+    );
+  }
+
+  // ========================
+  // 定期実行してた処理たちを止める
+  // ========================
+  void _finishJobs() {
+    // 音声を停止
+    _stopAudio();
+    // 位置情報の更新を停止
+    _getPositionSubscription?.cancel();
+    // 情報取得の停止
+    _getCurrentValueTimer?.cancel();
+
+    _isFinished = true;
+  }
+
+  // ========================
+  // 音声を再生・停止
   // ========================
   Future<void> _startAudio() async {
     print("startMethod: _startAudio");
     try {
       await platform.invokeMethod('playAudio', [x, y, z]);
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _stopAudio() async {
+    print("startMethod: _stopAudio");
+    try {
+      await platform.invokeMethod('stopAudio', [x, y, z]);
     } on PlatformException catch (e) {
       print(e);
     }

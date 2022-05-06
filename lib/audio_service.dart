@@ -20,9 +20,12 @@ class AudioService {
     await FirebaseService.setAudios();
     // 場所を全て設定
     spotList = await FirebaseService.getSpots();
-    currentSpot = spotList[0];
     // MethodChannelを設定
     this.platform = platform;
+
+    // 初期目的地を設定
+    currentSpot = spotList[0];
+    await _initializeAudio();
   }
 
   // ========================

@@ -54,6 +54,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('audio');
 
+  // 目的地
+  String spotName = "";
+  String audioName = "";
+
   // 目的地までの距離
   double distance = 0.0;
   double x = 0.0;
@@ -98,11 +102,15 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             latitude = position.latitude;
             longitude = position.longitude;
+
+            spotName = spot.name;
+            audioName = spot.audio.name;
             distance = double.parse((spot.distance).toStringAsFixed(2));
             x = spot.xDistance;
             y = spot.yDistance;
           });
 
+          // 音楽を再生
           await _startAudio();
         }
       });
@@ -206,6 +214,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
+        Text(spotName,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(audioName),
+        const SizedBox(height: 30),
         const Text("目的地までの距離"),
         Text('$distanceメートル'),
         const SizedBox(height: 20),
@@ -213,11 +225,11 @@ class _MyHomePageState extends State<MyHomePage> {
         Text('x: $x'),
         Text('y: $y'),
         Text('z: $z'),
-        const SizedBox(height: 50),
+        const SizedBox(height: 30),
         const Text("現在の位置情報"),
         Text('Latitude: $latitude'),
         Text('Longitude: $longitude'),
-        const SizedBox(height: 50),
+        const SizedBox(height: 30),
         const Text("回転情報"),
         Text('Yaw: $yaw'),
         Text('Pitch: $pitch'),

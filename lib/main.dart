@@ -93,6 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
       await audioService.initialize(platform);
 
       // 位置情報を定期的に取得・反映
+      // TODO: background移行時に終了するようにする
+      // TODO: stopAudioも実装する。
       Geolocator.getPositionStream(locationSettings: locationSettings)
           .listen((Position? position) async {
         if (position != null) {

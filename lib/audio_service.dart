@@ -28,12 +28,12 @@ class AudioService {
   // 最も近い場所を選ぶ
   // ========================
   Future<Spot> setNearestSpot(Position position) async {
-    Audio oldAudio = currentSpot.audio;
+    Spot oldSpot = currentSpot;
 
     for (Spot spot in spotList) {
       // 直線上の距離を計算
       spot.setDistance(position);
-      if (spot == currentSpot) {
+      if (spot.id == currentSpot.id) {
         continue;
       }
 
@@ -43,7 +43,7 @@ class AudioService {
       }
     }
 
-    if (oldAudio != currentSpot.audio) {
+    if (oldSpot.audio.id != currentSpot.audio.id) {
       // 音源が変更した場合に, Swift側で再設定
       await _initializeAudio();
     }

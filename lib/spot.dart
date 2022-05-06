@@ -2,6 +2,7 @@ import 'package:geolocator/geolocator.dart';
 import 'audio.dart';
 
 class Spot {
+  String id;
   String name;
   double latitude;
   double longitude;
@@ -11,14 +12,14 @@ class Spot {
   late double xDistance;
   late double yDistance;
 
-  Spot(this.name, this.latitude, this.longitude, this.audio);
+  Spot(this.id, this.name, this.latitude, this.longitude, this.audio);
 
-  static Spot fromJson(dynamic json, Map<String, Audio> audioMap) {
+  static Spot fromJson(String id, dynamic json, Map<String, Audio> audioMap) {
     final name = json["name"] as String;
     final latitude = json["latitude"] as double;
     final longitude = json["longitude"] as double;
     final audio = audioMap[json["audioId"] as String]!;
-    return Spot(name, latitude, longitude, audio);
+    return Spot(id, name, latitude, longitude, audio);
   }
 
   // 直線距離を計算

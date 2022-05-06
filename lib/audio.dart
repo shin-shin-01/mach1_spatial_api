@@ -5,8 +5,7 @@ class Audio {
 
   Audio(this.id, this.name, this.url);
 
-  static Audio fromJson(dynamic json) {
-    final id = json["id"] as String;
+  static Audio fromJson(String id, dynamic json) {
     final name = json["name"] as String;
     final url = json["url"] as String;
     return Audio(id, name, url);

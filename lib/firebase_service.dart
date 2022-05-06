@@ -13,8 +13,8 @@ class FirebaseService {
 
     // key: id, value: audio のmapに変換
     audioMap = {};
-    for (dynamic doc in snapshot.docs) {
-      Audio audio = Audio.fromJson(doc.data());
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
+      Audio audio = Audio.fromJson(doc.id, doc.data());
       audioMap[audio.id] = audio;
     }
   }
@@ -23,7 +23,7 @@ class FirebaseService {
     final snapshot = await FirebaseFirestore.instance.collection('spots').get();
     return snapshot.docs
         .map(
-          (doc) => Spot.fromJson(doc.data(), audioMap),
+          (doc) => Spot.fromJson(doc.id, doc.data(), audioMap),
         )
         .toList();
   }

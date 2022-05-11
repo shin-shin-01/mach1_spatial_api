@@ -33,23 +33,25 @@ import Flutter
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
+  private let audioController: AudioController = AudioController();
+
   func initialize(result: FlutterResult, controller: FlutterViewController, audioFilePath: String) {
-    AudioController().initialize(audioFilePath: audioFilePath)
+    audioController.initialize(audioFilePath: audioFilePath)
     result(true)
   }
 
  func playAudio(result: FlutterResult, controller: FlutterViewController, x: Float, y: Float, z: Float) {
-    AudioController().playAudio(x: x, y: y, z: z)
+    audioController.playAudio(x: x, y: y, z: z)
     // https://github.com/florent37/Flutter-AssetsAudioPlayer/blob/4ead5eb3ac7b7059507c72418df22251fedd92fe/darwin/Classes/Music.swift#L1070
     result(true)
   }
 
   func stopAudio(result: FlutterResult, controller: FlutterViewController) {
-    AudioController().stopAudio()
+    audioController.stopAudio()
     result(true)
   }
 
   func getCurrentValue(result: FlutterResult, controller: FlutterViewController) {
-    result(AudioController().getCurrentValue())
+    result(audioController.getCurrentValue())
   }
 }

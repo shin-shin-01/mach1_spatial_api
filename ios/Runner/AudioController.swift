@@ -21,8 +21,6 @@ private var motionManager = CMMotionManager()
 private var headphoneMotionManager = CMHeadphoneMotionManager()
 private var bUseHeadphoneOrientationData = true
 
-var m1obj = Mach1DecodePositional()
-
 var isPlaying = false
 var players: [AVAudioPlayer] = [AVAudioPlayer(), AVAudioPlayer()]
 
@@ -78,8 +76,7 @@ func getEuler(q1 : SCNVector4) -> SIMD3<Float>
 }
 
 @available(iOS 14.0, *)
-class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
-
+class AudioController: CMHeadphoneMotionManagerDelegate {
     // 音声を再生
     func playAudio(x: Float, y: Float, z: Float) {
         cameraPosition = Mach1Point3D(
@@ -88,7 +85,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             z: z
         )
 
-        print("start: ViewController.playAudio()")
+        print("start: AudioController.playAudio()")
         if !isPlaying {
             let startDelayTime = 1.0
             let now = players[0].deviceCurrentTime
@@ -102,7 +99,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
     
     // 音声を停止
     func stopAudio() {
-        print("start: ViewController.stopAudio()")
+        print("start: AudioController.stopAudio()")
         players[0].stop()
         players[1].stop()
         isPlaying = false
@@ -124,6 +121,7 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
         // ===========================
         // Mach1 Decode Setup
         // ===========================
+        var m1obj = Mach1DecodePositional()
         // Setup the correct angle convention for orientation Euler input angles
         m1obj.setPlatformType(type: Mach1PlatformiOS)
         // Setup the expected spatial audio mix format for decoding
@@ -176,9 +174,9 @@ class ViewController: UIViewController, CMHeadphoneMotionManagerDelegate {
             // TODO: ここの動作確認
             //  サンプルでは以下の実装をしているが,デバイスの更新頻度が高いので
             //  AirPodsでの更新があまり反映されていない気がする？
-            motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical,  to: queue, withHandler: { (motion, error) -> Void in
+            motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical,  to: queue, withHandler: { [weak self] (motion, error) -> Void in
                 if (bUseHeadphoneOrientationData && headphoneMotionManager.isDeviceMotionAvailable){
-                    headphoneMotionManager.startDeviceMotionUpdates(to: queue, withHandler: { (headphonemotion, error) -> Void in
+                    headphoneMotionManager.startDeviceMotionUpdates(to: queue, withHandler: { [weak self] (headphonemotion, error) -> Void in
                         let quat = headphonemotion?.gaze(atOrientation: UIApplication.shared.statusBarOrientation)
                         let angles = getEuler(q1: quat!)
                         cameraYaw = angles.x

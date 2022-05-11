@@ -11,7 +11,6 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		3DA99F0DFF79C61CE60F9F7E /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACD8A0D8195D52ADABAC252B /* Pods_Runner.framework */; };
 		6C24965128239BD0008FD881 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6C24965028239BD0008FD881 /* GoogleService-Info.plist */; };
-		6C34170B280AB0AA0083B77E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C34170A280AB0AA0083B77E /* ViewController.swift */; };
 		6C341745280AC93C0083B77E /* 001.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C34173C280AC93C0083B77E /* 001.aif */; };
 		6C341746280AC93C0083B77E /* 000.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C34173D280AC93C0083B77E /* 000.aif */; };
 		6C341747280AC93C0083B77E /* 002.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C34173E280AC93C0083B77E /* 002.aif */; };
@@ -22,6 +21,7 @@
 		6C34174C280AC93C0083B77E /* 005.aif in Resources */ = {isa = PBXBuildFile; fileRef = 6C341743280AC93C0083B77E /* 005.aif */; };
 		6C34174D280AC93C0083B77E /* stereo.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6C341744280AC93C0083B77E /* stereo.wav */; };
 		6C341751280BCD9C0083B77E /* CMDeviceMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */; };
+		6C4AD062282B461600CF8CBB /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4AD061282B461600CF8CBB /* AudioController.swift */; };
 		6CD0DF3B2818CE9F0078B1FA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CD0DF3A2818CE8A0078B1FA /* libsqlite3.tbd */; };
 		6CD1E53F2813D00C000039B1 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD1E53E2813D00C000039B1 /* Encoder.swift */; };
 		6CD1E5412813D09D000039B1 /* kotobuki_city.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6CD1E5402813D09D000039B1 /* kotobuki_city.wav */; };
@@ -50,7 +50,6 @@
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		6C24965028239BD0008FD881 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		6C34170A280AB0AA0083B77E /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		6C34173C280AC93C0083B77E /* 001.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 001.aif; sourceTree = "<group>"; };
 		6C34173D280AC93C0083B77E /* 000.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 000.aif; sourceTree = "<group>"; };
 		6C34173E280AC93C0083B77E /* 002.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 002.aif; sourceTree = "<group>"; };
@@ -61,6 +60,7 @@
 		6C341743280AC93C0083B77E /* 005.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = 005.aif; sourceTree = "<group>"; };
 		6C341744280AC93C0083B77E /* stereo.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stereo.wav; sourceTree = "<group>"; };
 		6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CMDeviceMotion.swift; sourceTree = "<group>"; };
+		6C4AD061282B461600CF8CBB /* AudioController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioController.swift; sourceTree = "<group>"; };
 		6CD0DF3A2818CE8A0078B1FA /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		6CD1E53E2813D00C000039B1 /* Encoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
 		6CD1E5402813D09D000039B1 /* kotobuki_city.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = kotobuki_city.wav; sourceTree = "<group>"; };
@@ -161,10 +161,10 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				6C4AD061282B461600CF8CBB /* AudioController.swift */,
 				6CD1E53E2813D00C000039B1 /* Encoder.swift */,
 				6C341750280BCD9C0083B77E /* CMDeviceMotion.swift */,
 				6C34173B280AC93C0083B77E /* Audio */,
-				6C34170A280AB0AA0083B77E /* ViewController.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -336,7 +336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6C34170B280AB0AA0083B77E /* ViewController.swift in Sources */,
+				6C4AD062282B461600CF8CBB /* AudioController.swift in Sources */,
 				6C341751280BCD9C0083B77E /* CMDeviceMotion.swift in Sources */,
 				6CD1E53F2813D00C000039B1 /* Encoder.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,

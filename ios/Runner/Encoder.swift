@@ -13,7 +13,7 @@ import SceneKit
 import Mach1SpatialAPI
 
 
-class Encoder: UIView {
+class Encoder {
     var players: [AVAudioPlayer] = [AVAudioPlayer(), AVAudioPlayer()]
     
     func setupPlayers(audioFilePath: String) -> [AVAudioPlayer] {

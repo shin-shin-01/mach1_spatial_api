@@ -13,9 +13,11 @@ import Flutter
     audioChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         switch call.method {
-        case "initialize":
+        case "initializeM1obj":
+          self.initializeM1obj(result: result, controller: controller)
+        case "initializeAudioPlayers":
           let arg = call.arguments as! String;
-          self.initialize(result: result, controller: controller, audioFilePath: arg)
+          self.initializeAudioPlayers(result: result, controller: controller, audioFilePath: arg)
         case "playAudio":
           let args = call.arguments as! Array<NSNumber>;
           self.playAudio(result: result, controller: controller, x: args[0].floatValue, y: args[1].floatValue, z: args[2].floatValue)
@@ -35,8 +37,13 @@ import Flutter
 
   private let audioController: AudioController = AudioController();
 
-  func initialize(result: FlutterResult, controller: FlutterViewController, audioFilePath: String) {
-    audioController.initialize(audioFilePath: audioFilePath)
+  func initializeAudioPlayers(result: FlutterResult, controller: FlutterViewController, audioFilePath: String) {
+    audioController.initializeAudioPlayers(audioFilePath: audioFilePath)
+    result(true)
+  }
+
+  func initializeM1obj(result: FlutterResult, controller: FlutterViewController) {
+    audioController.initializeM1obj()
     result(true)
   }
 

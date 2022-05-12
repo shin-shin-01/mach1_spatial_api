@@ -76,7 +76,7 @@ func getEuler(q1 : SCNVector4) -> SIMD3<Float>
 }
 
 @available(iOS 14.0, *)
-class AudioController: CMHeadphoneMotionManagerDelegate {
+class AudioController: NSObject, CMHeadphoneMotionManagerDelegate {
     // 音声を再生
     func playAudio(x: Float, y: Float, z: Float) {
         cameraPosition = Mach1Point3D(
@@ -114,10 +114,13 @@ class AudioController: CMHeadphoneMotionManagerDelegate {
         return ["yaw": cameraYaw, "pitch": cameraPitch, "roll": cameraRoll, "leftVolume": leftVolume, "rightVolume": rightVolume]
     }
 
-    // 最初に実行される箇所
-    func initialize(audioFilePath: String) {
+    // 音声ファイルを初期化
+    func initializeAudioPlayers(audioFilePath: String) {
         players = Encoder().setupPlayers(audioFilePath: audioFilePath)
-        
+    }
+
+    // M1objを初期化
+    func initializeM1obj() {
         // ===========================
         // Mach1 Decode Setup
         // ===========================
@@ -164,7 +167,7 @@ class AudioController: CMHeadphoneMotionManagerDelegate {
         /// `bUseHeadphones` lazily swaps between both manager's orientation updates
         motionManager = CMMotionManager()
         headphoneMotionManager = CMHeadphoneMotionManager()
-        headphoneMotionManager.delegate = self    
+        headphoneMotionManager.delegate = self
         if motionManager.isDeviceMotionAvailable == true {
             // データの更新頻度 (The interval, in seconds, ...)
             // https://developer.apple.com/documentation/coremotion/cmmotionmanager/1616065-devicemotionupdateinterval

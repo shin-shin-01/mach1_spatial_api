@@ -25,7 +25,8 @@ class AudioService {
 
     // 初期目的地を設定
     currentSpot = spotList[0];
-    await _initializeAudio();
+    await _initializeAudioPlayers();
+    await _initializeM1obj();
   }
 
   // ========================
@@ -53,7 +54,7 @@ class AudioService {
 
     if (oldSpot.audio.id != currentSpot.audio.id) {
       // 音源が変更した場合に, Swift側で再設定
-      await _initializeAudio();
+      await _initializeAudioPlayers();
     }
 
     // 決定したSpotとの距離を取得
@@ -63,14 +64,24 @@ class AudioService {
   }
 
   // 音声ファイルを用いてAudioを初期化
-  Future<void> _initializeAudio() async {
-    print("startMethod: _initializeAudio");
+  Future<void> _initializeAudioPlayers() async {
+    print("startMethod: _initializeAudioPlayers");
     final String audioFilePath = await DownloadService.downloadFile(
       currentSpot.audio.name,
       currentSpot.audio.url,
     );
     try {
-      await platform.invokeMethod('initialize', audioFilePath);
+      await platform.invokeMethod('initializeAudioPlayers', audioFilePath);
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
+  // M1objを初期化
+  Future<void> _initializeM1obj() async {
+    print("startMethod: _initializeM1obj");
+    try {
+      await platform.invokeMethod('initializeM1obj');
     } on PlatformException catch (e) {
       print(e);
     }

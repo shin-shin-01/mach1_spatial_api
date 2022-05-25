@@ -13,18 +13,8 @@ import Flutter
     audioChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         switch call.method {
-        case "initializeM1obj":
-          self.initializeM1obj(result: result, controller: controller)
-        case "initializeAudioPlayers":
-          let arg = call.arguments as! String;
-          self.initializeAudioPlayers(result: result, controller: controller, audioFilePath: arg)
-        case "playAudio":
-          let args = call.arguments as! Array<NSNumber>;
-          self.playAudio(result: result, controller: controller, x: args[0].floatValue, y: args[1].floatValue, z: args[2].floatValue)
-        case "stopAudio":
-          self.stopAudio(result: result, controller: controller)
-        case "getCurrentValue":
-          self.getCurrentValue(result: result, controller: controller)
+        case "startHeadphoneMotion":
+          self.startHeadphoneMotion(result: result, controller: controller)
         default:
           result(FlutterMethodNotImplemented)
           return
@@ -37,28 +27,8 @@ import Flutter
 
   private let audioController: AudioController = AudioController();
 
-  func initializeAudioPlayers(result: FlutterResult, controller: FlutterViewController, audioFilePath: String) {
-    audioController.initializeAudioPlayers(audioFilePath: audioFilePath)
+  func startHeadphoneMotion(result: FlutterResult, controller: FlutterViewController) {
+    audioController.startHeadphoneMotion()
     result(true)
-  }
-
-  func initializeM1obj(result: FlutterResult, controller: FlutterViewController) {
-    audioController.initializeM1obj()
-    result(true)
-  }
-
- func playAudio(result: FlutterResult, controller: FlutterViewController, x: Float, y: Float, z: Float) {
-    audioController.playAudio(x: x, y: y, z: z)
-    // https://github.com/florent37/Flutter-AssetsAudioPlayer/blob/4ead5eb3ac7b7059507c72418df22251fedd92fe/darwin/Classes/Music.swift#L1070
-    result(true)
-  }
-
-  func stopAudio(result: FlutterResult, controller: FlutterViewController) {
-    audioController.stopAudio()
-    result(true)
-  }
-
-  func getCurrentValue(result: FlutterResult, controller: FlutterViewController) {
-    result(audioController.getCurrentValue())
   }
 }
